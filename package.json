@@ -1,0 +1,47 @@
+{
+  "name": "@infoxchange/make-it-so",
+  "version": "<version set when releasing>",
+  "description": "Makes deploying services to IX infra easy",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint . --fix && prettier . --write",
+    "prepare": "husky",
+    "commit": "lint-staged && commit"
+  },
+  "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
+  "license": "MIT",
+  "exports": {
+    "./cdk-constructs": "./dist/cdk-constructs/index.js",
+    "./deployConfig": "./dist/deployConfig.js"
+  },
+  "lint-staged": {
+    "**/*": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "dependencies": {
+    "@eslint/js": "^9.3.0",
+    "aws-cdk-lib": "2.142.1",
+    "constructs": "^10.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "sst": "2.42.0",
+    "typescript-eslint": "^7.11.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/prompt-cli": "^19.3.1",
+    "@tsconfig/node21": "^21.0.3",
+    "globals": "^15.3.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.5",
+    "prettier": "3.2.5",
+    "semantic-release": "^23.1.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

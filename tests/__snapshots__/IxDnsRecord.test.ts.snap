@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`create A record 1`] = `
+{
+  "IxVpcDetailsCertificateCustomResource": {
+    "DeletionPolicy": "Delete",
+    "Properties": {
+      "RecordFQDN": "example.com",
+      "RecordType": "A",
+      "RecordValue": "1.1.1.1",
+      "ServiceToken": {
+        "Ref": "SsmParameterValuesharedservicesroute53lambdaArnC96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+    },
+    "Type": "Custom::DNSRecordUpdaterLambda",
+    "UpdateReplacePolicy": "Delete",
+  },
+}
+`;
+
+exports[`create ALIAS record 1`] = `
+{
+  "IxVpcDetailsCertificateCustomResource": {
+    "DeletionPolicy": "Delete",
+    "Properties": {
+      "AliasZoneId": "Z1234567890",
+      "RecordFQDN": "example.com",
+      "RecordTTL": 300,
+      "RecordType": "ALIAS",
+      "RecordValue": "1.1.1.1",
+      "ServiceToken": {
+        "Ref": "SsmParameterValuesharedservicesroute53lambdaArnC96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+    },
+    "Type": "Custom::DNSRecordUpdaterLambda",
+    "UpdateReplacePolicy": "Delete",
+  },
+}
+`;
