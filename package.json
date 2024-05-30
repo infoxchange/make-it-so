@@ -2,6 +2,7 @@
   "name": "@infoxchange/make-it-so",
   "version": "<version set when releasing>",
   "description": "Makes deploying services to IX infra easy",
+  "repository": "github:infoxchange/make-it-so",
   "type": "module",
   "scripts": {
     "build": "tsc",
