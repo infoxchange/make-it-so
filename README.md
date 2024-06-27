@@ -44,14 +44,14 @@ if (deployConfig.isIxDeploy) {
 
 Deploys a serverless instance of a Next.js. IxNextjsSite extends [SST's NextjsSite](https://docs.sst.dev/constructs/NextjsSite) and takes the exact same props.
 
-It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will
+It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
 
 It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
 
 ```typescript
 import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
 
-const site = new IxNextjsSite(stack, "site", {
+const site = new IxNextjsSite(stack, "Site", {
   environment: {
     DATABASE_URL: process.env.DATABASE_URL || "",
     SESSION_SECRET: process.env.SESSION_SECRET || "",
@@ -64,6 +64,38 @@ const site = new IxNextjsSite(stack, "site", {
 });
 ```
 
+### CDK Construct - IxElasticache
+
+Deploys an AWS Elasticache cluster, either the redis or the memcached flavour.
+
+It will also automatically attach the cluster to the standard IX VPC created in each workload account (unless you explicitly pass a different VPC to be attached with the vpc prop or set the vpc prop to `undefined` which will stop any VPC being attached).
+
+```typescript
+import { IxElasticache } from "@infoxchange/make-it-so/cdk-constructs";
+
+const redisCluster = new IxElasticache(stack, "elasticache", {
+  autoMinorVersionUpgrade: true,
+  cacheNodeType: "cache.t2.small",
+  engine: "redis",
+  numCacheNodes: 1,
+});
+```
+
+#### Options:
+
+| Prop                      | Type     | Description                                                                                                                                           |
+| ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| vpc                       | IVpc     | (optional) A VPC to attach if not using default IX VPC                                                                                                |
+| vpcSubnetIds              | string[] | (optional) List of IDs of subnets to be used if not using default IX VPC subnets                                                                      |
+| [...CfnCacheClusterProps] |          | Any props accepted by [CfnCacheCluster](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_elasticache.CfnCacheCluster.html#construct-props) |
+
+#### Properties:
+
+| Properties       | Type            | Description                                                      |
+| ---------------- | --------------- | ---------------------------------------------------------------- |
+| connectionString | string          | A string with all the details required to connect to the cluster |
+| cluster          | CfnCacheCluster | An AWS CDK CfnCacheCluster instance                              |
+
 ### CDK Construct - IxCertificate
 
 Creates a new DNS validated ACM certificate for a domain managed by IX.
@@ -71,12 +103,14 @@ Creates a new DNS validated ACM certificate for a domain managed by IX.
 ```typescript
 import { IxCertificate } from "@infoxchange/make-it-so/cdk-constructs";
 
-const domainCert = new IxCertificate(scope, "IxCertificate", {
+const domainCert = new IxCertificate(scope, "ExampleDotComCertificate", {
   domainName: "example.com",
   subjectAlternativeNames: ["other-domain.com"],
   region: "us-east-1",
 });
 ```
+
+#### Options:
 
 | Prop                    | Type     | Description                                                     |
 | ----------------------- | -------- | --------------------------------------------------------------- |
@@ -91,13 +125,15 @@ Creates a DNS record for a domain managed by IX. Route53 HostedZones for IX mana
 ```typescript
 import { IxDnsRecord } from "@infoxchange/make-it-so/cdk-constructs";
 
-new IxDnsRecord(scope, `DnsRecord-${domainNameLogicalId}`, {
+new IxDnsRecord(scope, "IxDnsRecord", {
   type: "A",
   name: "example.com",
   value: "1.1.1.1",
   ttl: 900,
 });
 ```
+
+#### Options:
 
 | Prop         | Type                                       | Description                                                                                                                                                                                                                     |
 | ------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -115,8 +151,10 @@ Fetches the standard VPC and subnets that exist in all IX workload aws accounts.
 ```typescript
 import { IxVpcDetails } from "@infoxchange/make-it-so/cdk-constructs";
 
-const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
+const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 ```
+
+#### Options:
 
 | Prop                    | Type     | Description                                                     |
 | ----------------------- | -------- | --------------------------------------------------------------- |
