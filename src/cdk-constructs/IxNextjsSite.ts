@@ -19,6 +19,7 @@ export class IxNextjsSite extends NextjsSite {
     props: ConstructProps = {},
   ) {
     const isIxDeploy = !!process.env.IX_APP_NAME;
+    console.log("blar");
 
     if (isIxDeploy) {
       IxNextjsSite.addVpcDetailsToProps(scope, id, props);
