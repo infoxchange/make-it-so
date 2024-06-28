@@ -23,7 +23,7 @@ export class IxVpcDetails extends Construct {
 
   private getVpcSubnet(scope: ConstructScope): SubnetSelection {
     const vpcSubnetIds = [1, 2, 3].map((subnetNum) =>
-      StringParameter.valueFromLookup(
+      StringParameter.valueForStringParameter(
         scope,
         `/vpc/subnet/private-${ixDeployConfig.workloadGroup}/${subnetNum}/id`,
       ),
