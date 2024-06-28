@@ -1,6 +1,4 @@
 export default {
-  release: {
-    branches: ["main"],
-    preset: "conventionalcommits",
-  },
+  branches: ["main", { name: "internal-testing-*", prerelease: true }],
+  preset: "conventionalcommits",
 };

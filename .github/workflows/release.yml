@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - internal-testing-*
 
 permissions:
   contents: read # for checkout
