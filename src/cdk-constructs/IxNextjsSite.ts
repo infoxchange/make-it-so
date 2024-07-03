@@ -53,20 +53,6 @@ export class IxNextjsSite extends NextjsSite {
         vpc: vpcDetails.vpc,
       };
     }
-    if (!props.cdk?.server || !("vpcSubnets" in props.cdk.server)) {
-      props.cdk = props.cdk ?? {};
-      props.cdk.server = {
-        ...props.cdk.server,
-        vpcSubnets: vpcDetails.vpcSubnets,
-      };
-    }
-    if (!props.cdk?.revalidation || !("vpcSubnets" in props.cdk.revalidation)) {
-      props.cdk = props.cdk ?? {};
-      props.cdk.revalidation = {
-        ...props.cdk.revalidation,
-        vpcSubnets: vpcDetails.vpcSubnets,
-      };
-    }
   }
 
   // This must be static because we need to call it in the constructor before super

@@ -42,12 +42,7 @@ export class IxElasticache extends Construct {
       // Setup VPC subnets
       if (vpc && !vpcSubnetIds) {
         if (deployConfig.isIxDeploy) {
-          vpcSubnetIds = [1, 2, 3].map((subnetNum) =>
-            StringParameter.valueForStringParameter(
-              scope,
-              `/vpc/subnet/private-${deployConfig.workloadGroup}/${subnetNum}/id`,
-            ),
-          );
+          vpcSubnetIds = IxVpcDetails.getVpcSubnetIds(scope);
         } else {
           vpcSubnetIds = vpc.privateSubnets.map((subnet) => subnet.subnetId);
 
