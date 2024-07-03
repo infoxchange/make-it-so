@@ -1,6 +1,6 @@
 {
   "name": "@infoxchange/make-it-so",
-  "version": "0.0.0-version-set-when-releasing",
+  "version": "<version set when releasing>",
   "description": "Makes deploying services to IX infra easy",
   "repository": "github:infoxchange/make-it-so",
   "type": "module",
