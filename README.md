@@ -204,8 +204,12 @@ important that sst and aws lib version match those used in ix-deploy-support
 
 Honestly I've never seen Star Trek but I figured the name is appropriate since the goal of this library is to allow you, the user, to deploy applications by stating what you want and letting someone else handle the nitty gritty details of how to actually implement it.
 
-# Contributing
+# Development and Contributing
 
 Changes to the main branch automatically trigger the CI to build and publish to npm. We do this with [semantic-release](https://semantic-release.gitbook.io/) which uses commit messages to determine what the new version number should be.
 
 Commit messages must be formatted in the [Conventional Commits](https://www.conventionalcommits.org) style to allow semantic-release to generate release notes based on the git history. To help with this the CLI tool for creating a commit with a valid commit message can be used via `npm run commit`.
+
+If adding a new construct the easiest way to develop it maybe by building it in whatever app repo it is intended to be used in. When it appears to be working correctly it can be moved into make-it-so and the app can be updated to import that construct from make-it-so.
+
+To test change a change in make-it-so create a branch starting with the prefix "internal-testing-". When pushed the CI will release a new package with a pre-release version. It'll look a little something like `2.1.3-internal-testing-name-of-feature.3`. A serverless app using make-it-so can be modified to use this package version and then deployed to a dev environment to test that the make-it-so changes are functioning correctly. Once a change has been merged into main and there are no serverless apps using the pre-release package any more it's a good idea to [delete that version](https://docs.npmjs.com/unpublishing-packages-from-the-registry#unpublishing-a-single-version-of-a-package) to keep the [npm package version history clean](https://www.npmjs.com/package/@infoxchange/make-it-so?activeTab=versions).
