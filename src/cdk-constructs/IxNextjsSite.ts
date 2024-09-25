@@ -4,6 +4,7 @@ import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { IxVpcDetails } from "./IxVpcDetails.js";
 import { IxDnsRecord } from "./IxDnsRecord.js";
 import ixDeployConfig from "../deployConfig.js";
+import { convertToBase62Hash } from "../shared.js";
 
 type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
 type ConstructId = ConstructorParameters<typeof NextjsSite>[1];
@@ -159,19 +160,4 @@ export class IxNextjsSite extends NextjsSite {
     this.primaryCustomDomain ?? this.cdk?.distribution.distributionDomainName;
 
   public primaryOrigin = `https://${this.primaryDomain}`;
-}
-
-function convertToBase62Hash(string: string): string {
-  const base62Chars =
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let hash = "";
-  let num = 0;
-  for (let i = 0; i < string.length; i++) {
-    num += string.charCodeAt(i);
-  }
-  while (num > 0) {
-    hash = base62Chars[num % 62] + hash;
-    num = Math.floor(num / 62);
-  }
-  return hash;
 }
