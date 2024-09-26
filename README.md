@@ -64,6 +64,23 @@ const site = new IxNextjsSite(stack, "Site", {
 });
 ```
 
+### CDK Construct - IxApi
+
+Deploys an instance of API Gateway. IxApi extends [SST's Api](https://docs.sst.dev/constructs/Api) and takes the exact same props.
+
+It will automatically create certificates and DNS records for a single domain that the API should deploy to. If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the domain. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used. Regardless of if a custom domain is set, the API Gateway will still be accessible via the 'api-id.execute-api.region.amazonaws.com' url.
+
+```typescript
+import { IxApi } from "@infoxchange/make-it-so/cdk-constructs";
+
+const site = new IxApi(stack, "api", {
+  // Included by default:
+  // customDomain: {
+  //   domainName: ixDeployConfig.siteDomains[0],
+  // },
+});
+```
+
 ### CDK Construct - IxElasticache
 
 Deploys an AWS Elasticache cluster, either the redis or the memcached flavour.
