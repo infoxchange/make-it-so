@@ -19,16 +19,14 @@ export class IxNextjsSite extends NextjsSite {
     id: ConstructId,
     props: ConstructProps = {},
   ) {
-    const isIxDeploy = !!process.env.IX_APP_NAME;
-
-    if (isIxDeploy) {
+    if (ixDeployConfig.isIxDeploy) {
       IxNextjsSite.addVpcDetailsToProps(scope, id, props);
       IxNextjsSite.setupCustomDomain(scope, id, props);
     }
 
     super(scope, id, props);
 
-    if (isIxDeploy) {
+    if (ixDeployConfig.isIxDeploy) {
       this.createDnsRecords(scope);
     }
   }
