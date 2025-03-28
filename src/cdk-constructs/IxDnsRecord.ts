@@ -1,7 +1,7 @@
 import { Construct } from "constructs";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { CustomResource } from "aws-cdk-lib";
-import { remapKeys } from "../shared.js";
+import { remapKeys } from "../lib/utils/objects.js";
 
 type ConstructScope = ConstructorParameters<typeof Construct>[0];
 type ConstructId = ConstructorParameters<typeof Construct>[1];

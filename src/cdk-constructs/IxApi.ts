@@ -2,7 +2,7 @@ import { Api } from "sst/constructs";
 import { IxCertificate } from "./IxCertificate.js";
 import { IxDnsRecord } from "./IxDnsRecord.js";
 import ixDeployConfig from "../deployConfig.js";
-import { convertToBase62Hash } from "../shared.js";
+import { convertToBase62Hash } from "../lib/utils/hash.js";
 
 type ConstructScope = ConstructorParameters<typeof Api>[0];
 type ConstructId = ConstructorParameters<typeof Api>[1];
