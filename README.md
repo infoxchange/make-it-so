@@ -56,7 +56,7 @@ if (deployConfig.isIxDeploy) {
 ### CDK Constructs
 
 <details>
-<summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js</summary>
+<summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js.</summary>
 
 IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the exact same props.
 
@@ -71,6 +71,30 @@ const site = new IxNextjsSite(stack, "Site", {
   environment: {
     DATABASE_URL: process.env.DATABASE_URL || "",
     SESSION_SECRET: process.env.SESSION_SECRET || "",
+  },
+  // Included by default:
+  // customDomain: {
+  //   domainName: ixDeployConfig.siteDomains[0],
+  //   alternateNames: ixDeployConfig.siteDomains.slice(1)
+  // },
+});
+```
+
+</details>
+
+<details>
+<summary><strong>IxStaticSite</strong> - Deploys a static site.</summary>
+
+IxStaticSite extends [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite) and takes the exact same props.
+
+It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
+
+```typescript
+import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
+
+const site = new IxStaticSite(stack, "Site", {
+  environment: {
+    DOOHICKEY_NAME: process.env.DOOHICKEY_NAME || "",
   },
   // Included by default:
   // customDomain: {
