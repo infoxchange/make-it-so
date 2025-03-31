@@ -2,7 +2,7 @@
 
 [![NPM Version](https://img.shields.io/npm/v/%40infoxchange%2Fmake-it-so)](https://www.npmjs.com/package/@infoxchange/make-it-so)
 
-A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST](https://sst.dev/) which is extending to take care the IX related specifics.
+A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST (version 2)](https://v2.sst.dev/what-is-sst) which is extending to take care the IX related specifics.
 
 ## Installation
 
@@ -58,7 +58,7 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js</summary>
 
-IxNextjsSite extends [SST's NextjsSite](https://docs.sst.dev/constructs/NextjsSite) and takes the exact same props.
+IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the exact same props.
 
 It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
 
@@ -85,7 +85,7 @@ const site = new IxNextjsSite(stack, "Site", {
 <details>
 <summary><strong>IxApi</strong> - Deploys an instance of API Gateway.</summary>
 
-IxApi extends [SST's Api](https://docs.sst.dev/constructs/Api) and takes the exact same props.
+IxApi extends [SST's Api](https://v2.sst.dev/constructs/Api) and takes the exact same props.
 
 It will automatically create certificates and DNS records for a single domain that the API should deploy to. If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the domain. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used. Regardless of if a custom domain is set, the API Gateway will still be accessible via the 'api-id.execute-api.region.amazonaws.com' url.
 
