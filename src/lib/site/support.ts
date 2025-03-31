@@ -23,6 +23,7 @@ export function setupCustomDomain<
       customDomain: {
         domainName: ixDeployConfig.siteDomains[0],
         alternateNames: ixDeployConfig.siteDomains.slice(1),
+        domainAlias: ixDeployConfig.siteDomainAliases[0],
       },
     };
   }

@@ -34,22 +34,23 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>Full list of available deployment properties</strong></summary>
 
-| Name              | Description                          | Type for IX Deploy                 | Type for non-IX Deploy |
-| ----------------- | ------------------------------------ | ---------------------------------- | ---------------------- |
-| isIxDeploy        | Is deploying via IX pipeline or not  | true                               | false                  |
-| appName           | Name of app being deployed           | string                             | string                 |
-| environment       | Name of env app is being deployed to | "dev" \| "test" \| "uat" \| "prod" | string                 |
-| workloadGroup     | The workload group of the app        | "ds" \| "srs"                      | string                 |
-| primaryAwsRegion  | AWS Region used by IX                | "ap-southeast-2"                   | string                 |
-| siteDomains       | Domains to be used by the app        | string[]                           | string[]               |
-| isInternalApp     | Domains to be used by the app        | boolean                            | boolean \| undefined   |
-| deploymentType    | Domains to be used by the app        | "docker" \| "serverless"           | string                 |
-| sourceCommitRef   | Domains to be used by the app        | string                             | string                 |
-| sourceCommitHash  | Domains to be used by the app        | string                             | string                 |
-| deployTriggeredBy | Domains to be used by the app        | string                             | string                 |
-| smtpHost          | Domains to be used by the app        | string                             | string                 |
-| smtpPort          | Domains to be used by the app        | number                             | number \| undefined    |
-| clamAVUrl         | Domains to be used by the app        | string                             | string                 |
+| Name              | Description                            | Type for IX Deploy                 | Type for non-IX Deploy |
+| ----------------- | -------------------------------------- | ---------------------------------- | ---------------------- |
+| isIxDeploy        | Is deploying via IX pipeline or not    | true                               | false                  |
+| appName           | Name of app being deployed             | string                             | string                 |
+| environment       | Name of env app is being deployed to   | "dev" \| "test" \| "uat" \| "prod" | string                 |
+| workloadGroup     | The workload group of the app          | "ds" \| "srs"                      | string                 |
+| primaryAwsRegion  | AWS Region used by IX                  | "ap-southeast-2"                   | string                 |
+| siteDomains       | Domains for the app to use             | string[]                           | string[]               |
+| siteDomainAliases | Domains to be redirected to primary    | string[]                           | string[]               |
+| isInternalApp     | If app is for internal usage           | boolean                            | boolean \| undefined   |
+| deploymentType    | What pipeline type is being used       | "docker" \| "serverless"           | string                 |
+| sourceCommitRef   | The git commit ref of deployed code    | string                             | string                 |
+| sourceCommitHash  | The git commit hash of deployed code   | string                             | string                 |
+| deployTriggeredBy | Config commit id that triggered deploy | string                             | string                 |
+| smtpHost          | SMTP host for the app to use           | string                             | string                 |
+| smtpPort          | SMTP port for the app to use           | number                             | number \| undefined    |
+| clamAVUrl         | ClamAV instance url for the app to use | string                             | string                 |
 
 </details>
 
