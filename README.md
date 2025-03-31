@@ -31,14 +31,22 @@ if (deployConfig.isIxDeploy) {
 }
 ```
 
-| Name             | Description                          | Type for IX Deploy | Type for non-IX Deploy |
-| ---------------- | ------------------------------------ | ------------------ | ---------------------- |
-| isIxDeploy       | Is deploying via IX pipeline or not  | true               | false                  |
-| appName          | Name of app being deployed           | string             | undefined              |
-| environment      | Name of env app is being deployed to | string             | undefined              |
-| workloadGroup    | The workload group of the app        | string             | undefined              |
-| primaryAwsRegion | AWS Region used by IX                | string             | undefined              |
-| siteDomains      | Domains to be used by the app        | string[]           | []                     |
+| Name              | Description                          | Type for IX Deploy                 | Type for non-IX Deploy |
+| ----------------- | ------------------------------------ | ---------------------------------- | ---------------------- |
+| isIxDeploy        | Is deploying via IX pipeline or not  | true                               | false                  |
+| appName           | Name of app being deployed           | string                             | string                 |
+| environment       | Name of env app is being deployed to | "dev" \| "test" \| "uat" \| "prod" | string                 |
+| workloadGroup     | The workload group of the app        | "ds" \| "srs"                      | string                 |
+| primaryAwsRegion  | AWS Region used by IX                | "ap-southeast-2"                   | string                 |
+| siteDomains       | Domains to be used by the app        | string[]                           | string[]               |
+| isInternalApp     | Domains to be used by the app        | boolean                            | boolean \| undefined   |
+| deploymentType    | Domains to be used by the app        | "docker" \| "serverless"           | string                 |
+| sourceCommitRef   | Domains to be used by the app        | string                             | string                 |
+| sourceCommitHash  | Domains to be used by the app        | string                             | string                 |
+| deployTriggeredBy | Domains to be used by the app        | string                             | string                 |
+| smtpHost          | Domains to be used by the app        | string                             | string                 |
+| smtpPort          | Domains to be used by the app        | number                             | number \| undefined    |
+| clamAVUrl         | Domains to be used by the app        | string                             | string                 |
 
 ### CDK Construct - IxNextjsSite
 
