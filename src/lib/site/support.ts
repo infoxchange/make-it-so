@@ -174,11 +174,9 @@ export function getCustomDomains<
   const domainNames = new Set<string>();
 
   const primaryCustomDomain = getPrimaryCustomDomain(props);
-  const aliasDomain = getAliasDomain(props);
   const alternativeDomains = getAlternativeDomains(props);
 
   if (primaryCustomDomain) domainNames.add(primaryCustomDomain);
-  if (aliasDomain) domainNames.add(aliasDomain);
   if (alternativeDomains.length)
     alternativeDomains.forEach((domain) => domainNames.add(domain));
 
