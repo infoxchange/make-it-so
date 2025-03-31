@@ -103,7 +103,13 @@ export function setupDomainAliasRedirect<
     targetDomain: props.customDomain.domainName,
     certificate: props.customDomain.cdk.certificate,
   });
-  return props;
+  return {
+    ...props,
+    customDomain: {
+      ...props.customDomain,
+      domainAlias: undefined, // SST's site constructs will complain if domainAlias is set while isExternalDomain is true
+    },
+  };
 }
 
 export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
