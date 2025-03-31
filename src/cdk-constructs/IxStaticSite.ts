@@ -1,6 +1,7 @@
 import { StaticSite } from "sst/constructs";
 import ixDeployConfig from "../deployConfig.js";
 import {
+  ExtendedStaticSiteProps,
   getAliasDomain,
   getAlternativeDomains,
   getCustomDomains,
@@ -10,14 +11,12 @@ import {
   setupCertificate,
   setupCustomDomain,
   setupDnsRecords,
+  setupDomainAliasRedirect,
 } from "../lib/site/support.js";
 
 type ConstructScope = ConstructorParameters<typeof StaticSite>[0];
 type ConstructId = ConstructorParameters<typeof StaticSite>[1];
-type ConstructProps = Exclude<
-  ConstructorParameters<typeof StaticSite>[2],
-  undefined
->;
+type ConstructProps = ExtendedStaticSiteProps;
 
 export class IxStaticSite extends StaticSite {
   // StaticSite's props are private, so we need to store them separately
@@ -31,6 +30,7 @@ export class IxStaticSite extends StaticSite {
     if (ixDeployConfig.isIxDeploy) {
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
+      props = setupDomainAliasRedirect(scope, id, props);
     }
 
     super(scope, id, props);

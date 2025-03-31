@@ -59,9 +59,13 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js.</summary>
 
-IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the exact same props.
+IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the same props with the addition of `isIxManagedDomain` in the `customDomain` property.
 
-It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
+If the props `customDomain` is not set then the first site domain provided by the IX deployment pipeline will be used as the primary custom domain, any additional domains (if there are any) will be used as alternative domain names and the first pipeline provided domain alias domain will be used will be used as a domain alias. This behaviour of setting pipeline configuring custom domains can be avoided by providing a value for `customDomain` (including explicitly setting it to `undefined` which will ensure no customDomain is used).
+
+If `isIxManagedDomain` is true (which is the case if `customDomain` is set automatically using pipeline provided values) and no custom certificate is given then one will be created for any custom domains given (including alternative domain names which the base SST construct doesn't currently do).
+
+Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
 
 It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
 
