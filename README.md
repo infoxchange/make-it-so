@@ -2,7 +2,7 @@
 
 [![NPM Version](https://img.shields.io/npm/v/%40infoxchange%2Fmake-it-so)](https://www.npmjs.com/package/@infoxchange/make-it-so)
 
-A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST](https://sst.dev/) which is extending to take care the IX related specifics.
+A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST (version 2)](https://v2.sst.dev/what-is-sst) which is extending to take care the IX related specifics.
 
 ## Installation
 
@@ -31,18 +31,34 @@ if (deployConfig.isIxDeploy) {
 }
 ```
 
-| Name             | Description                          | Type for IX Deploy | Type for non-IX Deploy |
-| ---------------- | ------------------------------------ | ------------------ | ---------------------- |
-| isIxDeploy       | Is deploying via IX pipeline or not  | true               | false                  |
-| appName          | Name of app being deployed           | string             | undefined              |
-| environment      | Name of env app is being deployed to | string             | undefined              |
-| workloadGroup    | The workload group of the app        | string             | undefined              |
-| primaryAwsRegion | AWS Region used by IX                | string             | undefined              |
-| siteDomains      | Domains to be used by the app        | string[]           | []                     |
+<details>
+<summary><strong>Full list of available deployment properties</strong></summary>
 
-### CDK Construct - IxNextjsSite
+| Name              | Description                          | Type for IX Deploy                 | Type for non-IX Deploy |
+| ----------------- | ------------------------------------ | ---------------------------------- | ---------------------- |
+| isIxDeploy        | Is deploying via IX pipeline or not  | true                               | false                  |
+| appName           | Name of app being deployed           | string                             | string                 |
+| environment       | Name of env app is being deployed to | "dev" \| "test" \| "uat" \| "prod" | string                 |
+| workloadGroup     | The workload group of the app        | "ds" \| "srs"                      | string                 |
+| primaryAwsRegion  | AWS Region used by IX                | "ap-southeast-2"                   | string                 |
+| siteDomains       | Domains to be used by the app        | string[]                           | string[]               |
+| isInternalApp     | Domains to be used by the app        | boolean                            | boolean \| undefined   |
+| deploymentType    | Domains to be used by the app        | "docker" \| "serverless"           | string                 |
+| sourceCommitRef   | Domains to be used by the app        | string                             | string                 |
+| sourceCommitHash  | Domains to be used by the app        | string                             | string                 |
+| deployTriggeredBy | Domains to be used by the app        | string                             | string                 |
+| smtpHost          | Domains to be used by the app        | string                             | string                 |
+| smtpPort          | Domains to be used by the app        | number                             | number \| undefined    |
+| clamAVUrl         | Domains to be used by the app        | string                             | string                 |
 
-Deploys a serverless instance of a Next.js. IxNextjsSite extends [SST's NextjsSite](https://docs.sst.dev/constructs/NextjsSite) and takes the exact same props.
+</details>
+
+### CDK Constructs
+
+<details>
+<summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js.</summary>
+
+IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the exact same props.
 
 It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
 
@@ -64,9 +80,36 @@ const site = new IxNextjsSite(stack, "Site", {
 });
 ```
 
-### CDK Construct - IxApi
+</details>
 
-Deploys an instance of API Gateway. IxApi extends [SST's Api](https://docs.sst.dev/constructs/Api) and takes the exact same props.
+<details>
+<summary><strong>IxStaticSite</strong> - Deploys a static site.</summary>
+
+IxStaticSite extends [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite) and takes the exact same props.
+
+It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
+
+```typescript
+import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
+
+const site = new IxStaticSite(stack, "Site", {
+  environment: {
+    DOOHICKEY_NAME: process.env.DOOHICKEY_NAME || "",
+  },
+  // Included by default:
+  // customDomain: {
+  //   domainName: ixDeployConfig.siteDomains[0],
+  //   alternateNames: ixDeployConfig.siteDomains.slice(1)
+  // },
+});
+```
+
+</details>
+
+<details>
+<summary><strong>IxApi</strong> - Deploys an instance of API Gateway.</summary>
+
+IxApi extends [SST's Api](https://v2.sst.dev/constructs/Api) and takes the exact same props.
 
 It will automatically create certificates and DNS records for a single domain that the API should deploy to. If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the domain. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used. Regardless of if a custom domain is set, the API Gateway will still be accessible via the 'api-id.execute-api.region.amazonaws.com' url.
 
@@ -81,9 +124,10 @@ const site = new IxApi(stack, "api", {
 });
 ```
 
-### CDK Construct - IxElasticache
+</details>
 
-Deploys an AWS Elasticache cluster, either the redis or the memcached flavour.
+<details>
+<summary><strong>IxElasticache</strong> - Deploys an AWS Elasticache cluster, either the redis or the memcached flavour.</summary>
 
 It will also automatically attach the cluster to the standard IX VPC created in each workload account (unless you explicitly pass a different VPC to be attached with the vpc prop or set the vpc prop to `undefined` which will stop any VPC being attached).
 
@@ -113,9 +157,10 @@ const redisCluster = new IxElasticache(stack, "elasticache", {
 | connectionString | string          | A string with all the details required to connect to the cluster |
 | cluster          | CfnCacheCluster | An AWS CDK CfnCacheCluster instance                              |
 
-### CDK Construct - IxCertificate
+</details>
 
-Creates a new DNS validated ACM certificate for a domain managed by IX.
+<details>
+<summary><strong>IxCertificate</strong> - Creates a new DNS validated ACM certificate for a domain managed by IX.</summary>
 
 ```typescript
 import { IxCertificate } from "@infoxchange/make-it-so/cdk-constructs";
@@ -135,9 +180,12 @@ const domainCert = new IxCertificate(scope, "ExampleDotComCertificate", {
 | subjectAlternativeNames | string[] | (optional) Any domains for the certs "Subject Alternative Name" |
 | region                  | string   | (optional) The AWS region to create the cert in                 |
 
-### CDK Construct - IxDnsRecord
+</details>
 
-Creates a DNS record for a domain managed by IX. Route53 HostedZones for IX managed domains live in the dns-hosting AWS account so if a workload AWS account requires a DNS record to be created this must be done "cross-account". IxDnsRecord handles that part for you. Just give it the details for the DNS record itself and IxDnsRecord will worry about creating it.
+<details>
+<summary><strong>IxDnsRecord</strong> - Creates a DNS record for a domain managed by IX.</summary>
+
+Route53 HostedZones for IX managed domains live in the dns-hosting AWS account so if a workload AWS account requires a DNS record to be created this must be done "cross-account". IxDnsRecord handles that part for you. Just give it the details for the DNS record itself and IxDnsRecord will worry about creating it.
 
 ```typescript
 import { IxDnsRecord } from "@infoxchange/make-it-so/cdk-constructs";
@@ -161,9 +209,10 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 | hostedZoneId | string                                     | (optional) The ID of the Route53 HostedZone belonging to the dns-hosting account in which to create the DNS record. If not given the correct HostedZone will be inferred from the domain in the "value" prop.                   |
 | aliasZoneId  | string                                     | (only needed if type = "Alias") the Route53 HostedZone that the target of the alias record lives in. Generally this will be the well known ID of a HostedZone for a AWS service itself that is managed by AWS, not an end-user. |
 
-### CDK Construct - IxVpcDetails
+</details>
 
-Fetches the standard VPC and subnets that exist in all IX workload aws accounts.
+<details>
+<summary><strong>IxVpcDetails</strong> - Fetches the standard VPC and subnets that exist in all IX workload aws accounts.</summary>
 
 ```typescript
 import { IxVpcDetails } from "@infoxchange/make-it-so/cdk-constructs";
@@ -178,6 +227,8 @@ const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 | domainName              | string   | Domain name for cert                                            |
 | subjectAlternativeNames | string[] | (optional) Any domains for the certs "Subject Alternative Name" |
 | region                  | string   | (optional) The AWS region to create the cert in                 |
+
+</details>
 
 ## Full Example
 

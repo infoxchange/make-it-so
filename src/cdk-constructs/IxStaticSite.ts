@@ -1,4 +1,4 @@
-import { NextjsSite } from "sst/constructs";
+import { StaticSite } from "sst/constructs";
 import ixDeployConfig from "../deployConfig.js";
 import {
   getAliasDomain,
@@ -10,29 +10,31 @@ import {
   setupCertificate,
   setupCustomDomain,
   setupDnsRecords,
-  setupVpcDetails,
 } from "../lib/site/support.js";
 
-type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
-type ConstructId = ConstructorParameters<typeof NextjsSite>[1];
+type ConstructScope = ConstructorParameters<typeof StaticSite>[0];
+type ConstructId = ConstructorParameters<typeof StaticSite>[1];
 type ConstructProps = Exclude<
-  ConstructorParameters<typeof NextjsSite>[2],
+  ConstructorParameters<typeof StaticSite>[2],
   undefined
 >;
 
-export class IxNextjsSite extends NextjsSite {
+export class IxStaticSite extends StaticSite {
+  // StaticSite's props are private, so we need to store them separately
+  private propsExtended: ConstructProps;
+
   constructor(
     scope: ConstructScope,
     id: ConstructId,
     props: ConstructProps = {},
   ) {
     if (ixDeployConfig.isIxDeploy) {
-      props = setupVpcDetails(scope, id, props);
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
     }
 
     super(scope, id, props);
+    this.propsExtended = props;
 
     if (ixDeployConfig.isIxDeploy) {
       setupDnsRecords(this, scope, id, props);
@@ -40,26 +42,26 @@ export class IxNextjsSite extends NextjsSite {
   }
 
   public get customDomains(): string[] {
-    return getCustomDomains(this.props);
+    return getCustomDomains(this.propsExtended);
   }
 
   public get primaryCustomDomain(): string | null {
-    return getPrimaryCustomDomain(this.props);
+    return getPrimaryCustomDomain(this.propsExtended);
   }
 
   public get aliasDomain(): string | null {
-    return getAliasDomain(this.props);
+    return getAliasDomain(this.propsExtended);
   }
 
   public get alternativeDomains(): string[] {
-    return getAlternativeDomains(this.props);
+    return getAlternativeDomains(this.propsExtended);
   }
 
   public get primaryDomain(): string | null {
-    return getPrimaryDomain(this, this.props);
+    return getPrimaryDomain(this, this.propsExtended);
   }
 
   public get primaryOrigin(): string | null {
-    return getPrimaryOrigin(this.props);
+    return getPrimaryOrigin(this.propsExtended);
   }
 }
