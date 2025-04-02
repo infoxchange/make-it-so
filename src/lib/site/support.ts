@@ -16,6 +16,7 @@ import { type DistributionDomainProps } from "sst/constructs/Distribution.js";
 
 export type ExtendedCustomDomains = DistributionDomainProps & {
   isIxManagedDomain?: boolean;
+  additionalDomainAliases?: string[];
 };
 export type ExtendedNextjsSiteProps = Omit<NextjsSiteProps, "customDomain"> & {
   customDomain?: string | ExtendedCustomDomains;
@@ -38,6 +39,7 @@ export function setupCustomDomain<
         domainName: ixDeployConfig.siteDomains[0],
         alternateNames: ixDeployConfig.siteDomains.slice(1),
         domainAlias: ixDeployConfig.siteDomainAliases[0],
+        additionalDomainAliases: ixDeployConfig.siteDomainAliases.slice(1),
       },
     };
   }
@@ -78,14 +80,21 @@ export function setupDomainAliasRedirect<
 >(scope: Construct, id: string, props: Readonly<Props>): Props {
   if (
     typeof props.customDomain !== "object" ||
-    !props.customDomain.domainAlias ||
+    !(
+      props.customDomain.domainAlias ||
+      props.customDomain.additionalDomainAliases?.length
+    ) ||
     !props.customDomain.isIxManagedDomain ||
     !props.customDomain.cdk?.certificate
   ) {
     return props;
   }
+  const domainsToRedirectFrom = [
+    ...(props.customDomain.domainAlias ? [props.customDomain.domainAlias] : []),
+    ...(props.customDomain.additionalDomainAliases ?? []),
+  ];
   new IxWebsiteRedirect(scope, id + "-IxWebsiteRedirect", {
-    recordNames: [props.customDomain.domainAlias],
+    recordNames: domainsToRedirectFrom,
     targetDomain: props.customDomain.domainName,
   });
   return {
