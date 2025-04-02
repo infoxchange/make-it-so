@@ -32,7 +32,7 @@ export class IxCertificate extends Construct {
       );
     const certificateCustomResource = new CustomResource(
       scope,
-      "CertificateCustomResource",
+      "CertificateCustomResource-" + id,
       {
         resourceType: "Custom::CertIssuingLambda",
         serviceToken: certificateCreationLambdaArn,
