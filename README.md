@@ -34,22 +34,23 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>Full list of available deployment properties</strong></summary>
 
-| Name              | Description                          | Type for IX Deploy                 | Type for non-IX Deploy |
-| ----------------- | ------------------------------------ | ---------------------------------- | ---------------------- |
-| isIxDeploy        | Is deploying via IX pipeline or not  | true                               | false                  |
-| appName           | Name of app being deployed           | string                             | string                 |
-| environment       | Name of env app is being deployed to | "dev" \| "test" \| "uat" \| "prod" | string                 |
-| workloadGroup     | The workload group of the app        | "ds" \| "srs"                      | string                 |
-| primaryAwsRegion  | AWS Region used by IX                | "ap-southeast-2"                   | string                 |
-| siteDomains       | Domains to be used by the app        | string[]                           | string[]               |
-| isInternalApp     | Domains to be used by the app        | boolean                            | boolean \| undefined   |
-| deploymentType    | Domains to be used by the app        | "docker" \| "serverless"           | string                 |
-| sourceCommitRef   | Domains to be used by the app        | string                             | string                 |
-| sourceCommitHash  | Domains to be used by the app        | string                             | string                 |
-| deployTriggeredBy | Domains to be used by the app        | string                             | string                 |
-| smtpHost          | Domains to be used by the app        | string                             | string                 |
-| smtpPort          | Domains to be used by the app        | number                             | number \| undefined    |
-| clamAVUrl         | Domains to be used by the app        | string                             | string                 |
+| Name              | Description                            | Type for IX Deploy                 | Type for non-IX Deploy |
+| ----------------- | -------------------------------------- | ---------------------------------- | ---------------------- |
+| isIxDeploy        | Is deploying via IX pipeline or not    | true                               | false                  |
+| appName           | Name of app being deployed             | string                             | string                 |
+| environment       | Name of env app is being deployed to   | "dev" \| "test" \| "uat" \| "prod" | string                 |
+| workloadGroup     | The workload group of the app          | "ds" \| "srs"                      | string                 |
+| primaryAwsRegion  | AWS Region used by IX                  | "ap-southeast-2"                   | string                 |
+| siteDomains       | Domains for the app to use             | string[]                           | string[]               |
+| siteDomainAliases | Domains to be redirected to primary    | string[]                           | string[]               |
+| isInternalApp     | If app is for internal usage           | boolean                            | boolean \| undefined   |
+| deploymentType    | What pipeline type is being used       | "docker" \| "serverless"           | string                 |
+| sourceCommitRef   | The git commit ref of deployed code    | string                             | string                 |
+| sourceCommitHash  | The git commit hash of deployed code   | string                             | string                 |
+| deployTriggeredBy | Config commit id that triggered deploy | string                             | string                 |
+| smtpHost          | SMTP host for the app to use           | string                             | string                 |
+| smtpPort          | SMTP port for the app to use           | number                             | number \| undefined    |
+| clamAVUrl         | ClamAV instance url for the app to use | string                             | string                 |
 
 </details>
 
@@ -58,9 +59,13 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js.</summary>
 
-IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the exact same props.
+IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the same props with the addition of `isIxManagedDomain` in the `customDomain` property.
 
-It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
+If the props `customDomain` is not set then the first site domain provided by the IX deployment pipeline will be used as the primary custom domain, any additional domains (if there are any) will be used as alternative domain names and the first pipeline provided domain alias domain will be used will be used as a domain alias. This behaviour of setting pipeline configuring custom domains can be avoided by providing a value for `customDomain` (including explicitly setting it to `undefined` which will ensure no customDomain is used).
+
+If `isIxManagedDomain` is true (which is the case if `customDomain` is set automatically using pipeline provided values) and no custom certificate is given then one will be created for any custom domains given (including alternative domain names which the base SST construct doesn't currently do).
+
+Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
 
 It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
 
@@ -85,9 +90,13 @@ const site = new IxNextjsSite(stack, "Site", {
 <details>
 <summary><strong>IxStaticSite</strong> - Deploys a static site.</summary>
 
-IxStaticSite extends [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite) and takes the exact same props.
+IxNextjsSite extends [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite) and takes the same props with the addition of `isIxManagedDomain` in the `customDomain` property.
 
-It will automatically create certificates and DNS records for any custom domains given (including alternative domain names which SST doesn't currently do). If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the primary custom domain and if there is more than one domain the rest will be used as alternative domain names. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used.
+If the props `customDomain` is not set then the first site domain provided by the IX deployment pipeline will be used as the primary custom domain, any additional domains (if there are any) will be used as alternative domain names and the first pipeline provided domain alias domain will be used will be used as a domain alias. This behaviour of setting pipeline configuring custom domains can be avoided by providing a value for `customDomain` (including explicitly setting it to `undefined` which will ensure no customDomain is used).
+
+If `isIxManagedDomain` is true (which is the case if `customDomain` is set automatically using pipeline provided values) and no custom certificate is given then one will be created for any custom domains given (including alternative domain names which the base SST construct doesn't currently do).
+
+Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
 
 ```typescript
 import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
@@ -208,6 +217,28 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 | ttl          | number                                     | (optional) TTL value for DNS record                                                                                                                                                                                             |
 | hostedZoneId | string                                     | (optional) The ID of the Route53 HostedZone belonging to the dns-hosting account in which to create the DNS record. If not given the correct HostedZone will be inferred from the domain in the "value" prop.                   |
 | aliasZoneId  | string                                     | (only needed if type = "Alias") the Route53 HostedZone that the target of the alias record lives in. Generally this will be the well known ID of a HostedZone for a AWS service itself that is managed by AWS, not an end-user. |
+
+</details>
+
+<details>
+<summary><strong>IxWebsiteRedirect</strong> - Creates a redirect from one domain to another.</summary>
+
+```typescript
+import { IxWebsiteRedirect } from "@infoxchange/make-it-so/cdk-constructs";
+
+new IxWebsiteRedirect(scope, "WebsiteRedirect", {
+  recordNames: ["www.example.com", "othersubdomain.example.com"],
+  targetDomain: "www.example.com",
+});
+```
+
+#### Options:
+
+| Prop         | Type                                                                                                             | Description                                                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| targetDomain | string                                                                                                           | The domain to redirect to                                                                     |
+| recordNames  | string[]                                                                                                         | The domains to redirect from                                                                  |
+| certificate  | [ICertificate](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_certificatemanager.ICertificate.html) | (optional) The certificate to use when serving the redirect, one will be created if not given |
 
 </details>
 
