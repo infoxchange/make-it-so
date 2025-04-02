@@ -1,6 +1,7 @@
 import { NextjsSite } from "sst/constructs";
 import ixDeployConfig from "../deployConfig.js";
 import {
+  type ExtendedNextjsSiteProps,
   getAliasDomain,
   getAlternativeDomains,
   getCustomDomains,
@@ -10,15 +11,13 @@ import {
   setupCertificate,
   setupCustomDomain,
   setupDnsRecords,
+  setupDomainAliasRedirect,
   setupVpcDetails,
 } from "../lib/site/support.js";
 
 type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
 type ConstructId = ConstructorParameters<typeof NextjsSite>[1];
-type ConstructProps = Exclude<
-  ConstructorParameters<typeof NextjsSite>[2],
-  undefined
->;
+type ConstructProps = ExtendedNextjsSiteProps;
 
 export class IxNextjsSite extends NextjsSite {
   constructor(
@@ -30,6 +29,7 @@ export class IxNextjsSite extends NextjsSite {
       props = setupVpcDetails(scope, id, props);
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
+      props = setupDomainAliasRedirect(scope, id, props);
     }
 
     super(scope, id, props);

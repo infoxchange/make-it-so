@@ -7,6 +7,7 @@ const envVars = {
   workloadGroup: process.env.IX_WORKLOAD_GROUP ?? "",
   primaryAwsRegion: process.env.IX_PRIMARY_AWS_REGION ?? "",
   siteDomains: process.env.IX_SITE_DOMAINS ?? "",
+  siteDomainAliases: process.env.IX_SITE_DOMAIN_ALIASES ?? "",
   isInternalApp: process.env.IX_INTERNAL_APP ?? "",
   deploymentType: process.env.IX_DEPLOYMENT_TYPE ?? "",
   sourceCommitRef: process.env.IX_SOURCE_COMMIT_REF ?? "",
@@ -25,6 +26,9 @@ const ixDeployConfigSchema = z
     workloadGroup: z.enum(["ds", "srs"]),
     primaryAwsRegion: z.literal("ap-southeast-2"),
     siteDomains: z
+      .string()
+      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomainAliases: z
       .string()
       .transform((val) => val.split(",").map((domain) => domain.trim())),
     isInternalApp: z.coerce.boolean(),
@@ -46,6 +50,9 @@ const nonIxDeployConfigSchema = z
     workloadGroup: z.string(),
     primaryAwsRegion: z.string(),
     siteDomains: z
+      .string()
+      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomainAliases: z
       .string()
       .transform((val) => val.split(",").map((domain) => domain.trim())),
     isInternalApp: z
