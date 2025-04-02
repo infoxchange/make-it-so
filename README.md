@@ -69,6 +69,14 @@ Also if `isIxManagedDomain` is true DNS records will be automatically created fo
 
 It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
 
+#### Options:
+
+| Prop                                 | Type     | Description                                                                                                                                                                                         |
+| ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [...NextjsSiteProps]                 |          | Any props accepted by [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite)                                                                                                                  |
+| customDomain.isIxManagedDomain       | boolean  | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them |
+| customDomain.additionalDomainAliases | string[] | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                |
+
 ```typescript
 import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
 
@@ -97,6 +105,14 @@ If the props `customDomain` is not set then the first site domain provided by th
 If `isIxManagedDomain` is true (which is the case if `customDomain` is set automatically using pipeline provided values) and no custom certificate is given then one will be created for any custom domains given (including alternative domain names which the base SST construct doesn't currently do).
 
 Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
+
+#### Options:
+
+| Prop                                 | Type     | Description                                                                                                                                                                                         |
+| ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [...NextjsSiteProps]                 |          | Any props accepted by [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite)                                                                                                                  |
+| customDomain.isIxManagedDomain       | boolean  | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them |
+| customDomain.additionalDomainAliases | string[] | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                |
 
 ```typescript
 import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
