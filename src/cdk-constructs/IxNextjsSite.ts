@@ -60,6 +60,6 @@ export class IxNextjsSite extends NextjsSite {
   }
 
   public get primaryOrigin(): string | null {
-    return getPrimaryOrigin(this.props);
+    return getPrimaryOrigin(this, this.props);
   }
 }

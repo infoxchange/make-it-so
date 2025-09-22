@@ -1,0 +1,73 @@
+name: Run Lints and Tests
+
+on:
+  push:
+    branches:
+      - "*"
+      - "!main"
+      - "!internal-testing-*"
+  pull_request: # We also run on PRs to verify the commit messages of all commits in the PR
+    branches:
+      - main
+      - internal-testing-*
+  workflow_call:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Used by "Validate PR commits with commitlint" step below
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - name: Print versions
+        run: |
+          git --version
+          node --version
+          npm --version
+          npx commitlint --version
+
+      - name: Install project packages
+        run: npm clean-install
+
+      - name: Validate current commit (last commit) with commitlint
+        if: github.event_name == 'push'
+        run: npx commitlint --last --verbose
+
+      - name: Validate PR commits with commitlint
+        if: github.event_name == 'pull_request'
+        run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Check formatting
+        run: npm run lint:check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - name: Print versions
+        run: |
+          git --version
+          node --version
+          npm --version
+
+      - name: Install project packages
+        run: npm clean-install
+
+      - name: Run tests
+        run: npm run test

@@ -4,7 +4,10 @@ import ixDeployConfig from "../deployConfig.js";
 
 type ConstructScope = ConstructorParameters<typeof Bucket>[0];
 type ConstructId = ConstructorParameters<typeof Bucket>[1];
-type ConstructProps = Exclude<ConstructorParameters<typeof Bucket>[2], undefined>;
+type ConstructProps = Exclude<
+  ConstructorParameters<typeof Bucket>[2],
+  undefined
+>;
 
 export class IxBucket extends Bucket {
   constructor(
@@ -19,12 +22,14 @@ export class IxBucket extends Bucket {
         ...props.cdk,
         bucket: {
           enforceSSL: true,
-          ...(ixDeployConfig.isIxDeploy ? { encryption: BucketEncryption.S3_MANAGED } : {}),
+          ...(ixDeployConfig.isIxDeploy
+            ? { encryption: BucketEncryption.S3_MANAGED }
+            : {}),
           ...props.cdk?.bucket,
         },
-        
       },
-    }
+    };
 
     super(scope, id, bucketProps);
-}}
+  }
+}
