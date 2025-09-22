@@ -62,6 +62,6 @@ export class IxStaticSite extends StaticSite {
   }
 
   public get primaryOrigin(): string | null {
-    return getPrimaryOrigin(this.propsExtended);
+    return getPrimaryOrigin(this, this.propsExtended);
   }
 }

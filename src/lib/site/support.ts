@@ -189,9 +189,12 @@ export function getPrimaryDomain<
 }
 
 export function getPrimaryOrigin<
+  Instance extends NextjsSite | StaticSite,
   Props extends ExtendedStaticSiteProps | ExtendedNextjsSiteProps,
->(props: Readonly<Props>): string | null {
-  const primaryDomain = getPrimaryCustomDomain(props);
+>(instance: Instance, props: Readonly<Props>): string | null {
+  const primaryDomain =
+    getPrimaryCustomDomain(props) ??
+    instance.cdk?.distribution?.distributionDomainName;
   return primaryDomain ? `https://${primaryDomain}` : null;
 }
 
