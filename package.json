@@ -8,6 +8,7 @@
     "build": "tsc",
     "test": "vitest",
     "lint": "eslint . --fix && prettier . --write",
+    "lint:check": "eslint . && prettier . --check",
     "prepare": "husky",
     "commit": "lint-staged && commit"
   },
