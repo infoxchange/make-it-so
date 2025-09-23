@@ -28,7 +28,7 @@ export class IxCertificate extends Construct {
     const certificateCreationLambdaArn =
       StringParameter.valueForStringParameter(
         scope,
-        "/shared-services/acm/lambdaArn",
+        "/shared-services/acm/lambdaArn-v2",
       );
     const certificateCustomResource = new CustomResource(
       scope,
