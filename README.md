@@ -67,7 +67,9 @@ If `isIxManagedDomain` is true (which is the case if `customDomain` is set autom
 
 Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
 
-It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
+It will also automatically attach the site to the standard IX VPC created in each workload account (unless you
+explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`) and set the env vars
+`HTTP_PROXY`, `http_proxy`, `HTTPS_PROXY` and `https_proxy` to the HTTP Proxy for the VPC.
 
 #### Options:
 
