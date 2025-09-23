@@ -2,6 +2,7 @@ import { Construct } from "constructs";
 import {
   NextjsSite,
   NextjsSiteProps,
+  Stack,
   StaticSite,
   StaticSiteProps,
 } from "sst/constructs";
@@ -136,6 +137,24 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
       ...updatedProps.cdk.revalidation,
       vpc: vpcDetails.vpc,
     };
+  }
+  return updatedProps;
+}
+export function setupDefaultEnvVars<Props extends ExtendedNextjsSiteProps>(
+  scope: Construct | Stack,
+  id: string,
+  props: Readonly<Props>,
+): Props {
+  const updatedProps: Props = { ...props };
+  // NextjsSite functions to not use default env var unfortunately so we have to
+  // explicitly set them ourselves https://github.com/sst/sst/issues/2359
+  if ("defaultFunctionProps" in scope) {
+    for (const funcProps of scope.defaultFunctionProps) {
+      updatedProps.environment = {
+        ...funcProps.environment,
+        ...updatedProps.environment,
+      };
+    }
   }
   return updatedProps;
 }

@@ -71,6 +71,9 @@ It will also automatically attach the site to the standard IX VPC created in eac
 explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`) and set the env vars
 `HTTP_PROXY`, `http_proxy`, `HTTPS_PROXY` and `https_proxy` to the HTTP Proxy for the VPC.
 
+Unlike SST's NextjsSite, any environment variables set with `stackOrApp.setDefaultFunctionProps()` or
+`stackOrApp.addDefaultFunctionEnv()` will be inherited by the IxNextjsSite lambda functions.
+
 #### Options:
 
 | Prop                                 | Type     | Description                                                                                                                                                                                         |
