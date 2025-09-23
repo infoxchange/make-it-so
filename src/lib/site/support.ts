@@ -119,6 +119,13 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
       ...updatedProps.cdk.server,
       vpc: vpcDetails.vpc,
     };
+    updatedProps.environment = {
+      HTTP_PROXY: ixDeployConfig.vpcHttpProxy,
+      http_proxy: ixDeployConfig.vpcHttpProxy,
+      HTTPS_PROXY: ixDeployConfig.vpcHttpProxy,
+      https_proxy: ixDeployConfig.vpcHttpProxy,
+      ...updatedProps.environment,
+    };
   }
   if (
     !updatedProps.cdk?.revalidation ||
