@@ -7,7 +7,7 @@ exports[`basic example - calls custom resource lambda with correct props 1`] = `
     "Properties": {
       "DomainName": "example.com",
       "ServiceToken": {
-        "Ref": "SsmParameterValuesharedservicesacmlambdaArnC96584B6F00A464EAD1953AFF4B05118Parameter",
+        "Ref": "SsmParameterValuesharedservicesacmlambdaArnv2C96584B6F00A464EAD1953AFF4B05118Parameter",
       },
     },
     "Type": "Custom::CertIssuingLambda",
@@ -24,7 +24,7 @@ exports[`full example - calls custom resource lambda with correct props 1`] = `
       "CertificateIssuingRegion": "us-west-2",
       "DomainName": "example.com",
       "ServiceToken": {
-        "Ref": "SsmParameterValuesharedservicesacmlambdaArnC96584B6F00A464EAD1953AFF4B05118Parameter",
+        "Ref": "SsmParameterValuesharedservicesacmlambdaArnv2C96584B6F00A464EAD1953AFF4B05118Parameter",
       },
       "SubjectAlternativeNames": [
         "other-domain.com",
