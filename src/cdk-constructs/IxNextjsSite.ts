@@ -27,11 +27,11 @@ export class IxNextjsSite extends NextjsSite {
     props: ConstructProps = {},
   ) {
     if (ixDeployConfig.isIxDeploy) {
+      props = setupDefaultEnvVars(scope, id, props);
       props = setupVpcDetails(scope, id, props);
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
-      props = setupDefaultEnvVars(scope, id, props);
     }
 
     super(scope, id, props);
