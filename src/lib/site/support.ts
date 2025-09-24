@@ -14,6 +14,7 @@ import { IxDnsRecord } from "../../cdk-constructs/IxDnsRecord.js";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { convertToBase62Hash } from "../utils/hash.js";
 import { type DistributionDomainProps } from "sst/constructs/Distribution.js";
+import type { Plan as SSTPlan } from "sst/constructs/SsrSite.js";
 
 export type ExtendedCustomDomains = DistributionDomainProps & {
   isIxManagedDomain?: boolean;
@@ -112,7 +113,7 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
   id: string,
   props: Readonly<Props>,
 ): Props {
-  const updatedProps: Props = { ...props };
+  let updatedProps: Props = { ...props };
   const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
   if (!updatedProps.cdk?.server || !("vpc" in updatedProps.cdk.server)) {
     updatedProps.cdk = updatedProps.cdk ?? {};
@@ -120,13 +121,7 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
       ...updatedProps.cdk.server,
       vpc: vpcDetails.vpc,
     };
-    updatedProps.environment = {
-      HTTP_PROXY: ixDeployConfig.vpcHttpProxy,
-      http_proxy: ixDeployConfig.vpcHttpProxy,
-      HTTPS_PROXY: ixDeployConfig.vpcHttpProxy,
-      https_proxy: ixDeployConfig.vpcHttpProxy,
-      ...updatedProps.environment,
-    };
+    updatedProps = addHttpProxyEnvVars(scope, id, updatedProps) as Props;
   }
   if (
     !updatedProps.cdk?.revalidation ||
@@ -140,18 +135,90 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
   }
   return updatedProps;
 }
+
+/**
+ * Adds HTTP proxy environment variables to the provided site props.
+ *
+ * We can't simply add them to `props.environment` because those are used during the build step which may happen outside
+ * the vpc. Instead we have to add them to all the places `props.environment` is used, accept for the build step.
+ */
+export function addHttpProxyEnvVars<Props extends ExtendedNextjsSiteProps>(
+  scope: Construct,
+  id: string,
+  props: Readonly<Props>,
+  proxyEnvVars?: Record<string, string>,
+): Props {
+  const updatedProps: Props = { ...props };
+
+  updatedProps.cdk = updatedProps.cdk ?? {};
+  const oldTransform = updatedProps.cdk.transform;
+  updatedProps.cdk.transform = (plan: SSTPlan) => {
+    oldTransform?.(plan);
+
+    if (!proxyEnvVars) {
+      if (!ixDeployConfig.vpcHttpProxy) {
+        console.warn(
+          `Attempting to add HTTP proxy environment variables to ${id} but the VPC_HTTP_PROXY env var is not configured.`,
+        );
+        return;
+      }
+
+      proxyEnvVars = {
+        HTTP_PROXY: ixDeployConfig.vpcHttpProxy,
+        HTTPS_PROXY: ixDeployConfig.vpcHttpProxy,
+        http_proxy: ixDeployConfig.vpcHttpProxy,
+        https_proxy: ixDeployConfig.vpcHttpProxy,
+      };
+    }
+
+    for (const origin of Object.values(plan.origins)) {
+      if (!("function" in origin) || !origin.function.environment) {
+        continue;
+      }
+      Object.assign(origin.function.environment, proxyEnvVars);
+    }
+  };
+  return updatedProps;
+}
+
 export function setupDefaultEnvVars<Props extends ExtendedNextjsSiteProps>(
   scope: Construct | Stack,
   id: string,
   props: Readonly<Props>,
 ): Props {
-  const updatedProps: Props = { ...props };
+  let updatedProps: Props = { ...props };
   // NextjsSite functions to not use default env var unfortunately so we have to
   // explicitly set them ourselves https://github.com/sst/sst/issues/2359
   if ("defaultFunctionProps" in scope) {
     for (const funcProps of scope.defaultFunctionProps) {
+      const defaultFunctionEnvVars = { ...funcProps.environment };
+
+      // Remove any HTTP proxy related env vars and set them in a separate call to addHttpProxyEnvVars
+      // to avoid them being used during the build step.
+      const defaultFunctionHttpProxyEnvVars: Record<string, string> = {};
+      for (const proxyEnvVar of [
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "http_proxy",
+        "https_proxy",
+      ]) {
+        if (proxyEnvVar in defaultFunctionEnvVars) {
+          defaultFunctionHttpProxyEnvVars[proxyEnvVar] =
+            defaultFunctionEnvVars[proxyEnvVar];
+          delete defaultFunctionEnvVars[proxyEnvVar];
+        }
+      }
+      if (Object.keys(defaultFunctionHttpProxyEnvVars).length) {
+        updatedProps = addHttpProxyEnvVars(
+          scope,
+          id,
+          updatedProps,
+          defaultFunctionHttpProxyEnvVars,
+        ) as Props;
+      }
+
       updatedProps.environment = {
-        ...funcProps.environment,
+        ...defaultFunctionEnvVars,
         ...updatedProps.environment,
       };
     }
