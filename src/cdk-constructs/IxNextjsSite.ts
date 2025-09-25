@@ -13,6 +13,7 @@ import {
   setupDnsRecords,
   setupDomainAliasRedirect,
   setupVpcDetails,
+  setupDefaultEnvVars,
 } from "../lib/site/support.js";
 
 type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
@@ -30,6 +31,7 @@ export class IxNextjsSite extends NextjsSite {
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
+      props = setupDefaultEnvVars(scope, id, props);
     }
 
     super(scope, id, props);

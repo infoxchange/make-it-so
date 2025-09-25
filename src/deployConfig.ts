@@ -16,6 +16,7 @@ const envVars = {
   smtpHost: process.env.SMTP_HOST ?? "",
   smtpPort: process.env.SMTP_PORT ?? "",
   clamAVUrl: process.env.CLAMAV_URL ?? "",
+  vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
 } satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
@@ -39,6 +40,7 @@ const ixDeployConfigSchema = z
     smtpHost: z.string().min(1),
     smtpPort: z.coerce.number().int(),
     clamAVUrl: z.string().url(),
+    vpcHttpProxy: z.string().url(),
   } satisfies Record<keyof typeof envVars, unknown>)
   .strip();
 
@@ -69,6 +71,7 @@ const nonIxDeployConfigSchema = z
         isNaN(parseInt(val, 10)) ? undefined : parseInt(val, 10),
       ),
     clamAVUrl: z.string(),
+    vpcHttpProxy: z.string(),
   } satisfies Record<keyof typeof envVars, unknown>)
   .strip();
 
