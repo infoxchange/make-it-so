@@ -2,7 +2,7 @@
 
 exports[`basic example - calls custom resource lambda with correct props 1`] = `
 {
-  "CertificateCustomResourceIxVpcDetails": {
+  "DomainCertIxVpcDetails": {
     "DeletionPolicy": "Delete",
     "Properties": {
       "DomainName": "example.com",
@@ -18,7 +18,7 @@ exports[`basic example - calls custom resource lambda with correct props 1`] = `
 
 exports[`full example - calls custom resource lambda with correct props 1`] = `
 {
-  "CertificateCustomResourceIxVpcDetails": {
+  "DomainCertIxVpcDetails": {
     "DeletionPolicy": "Delete",
     "Properties": {
       "CertificateIssuingRegion": "us-west-2",
