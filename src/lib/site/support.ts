@@ -233,9 +233,12 @@ export function applyConditionalEnvironmentVariables<
           `Setting runtime specific environment variable ${envVarName} to ${envVarValue}`,
         );
         if (envVarValue !== undefined) {
+          console.log("setting");
           origin.function.environment[envVarName] = envVarValue;
         } else {
-          delete origin.function.environment[envVarName];
+          console.log("deleting");
+          // @ts-expect-error - blar blar
+          origin.function.environment[envVarName] = undefined;
         }
       }
     }
