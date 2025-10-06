@@ -142,7 +142,9 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
 ): Props {
   const updatedProps: Props = { ...props };
   const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
+  console.log("updatedProps.cdk", updatedProps.cdk);
   if (!updatedProps.cdk?.server || !("vpc" in updatedProps.cdk.server)) {
+    console.log("adding vpc for default server");
     updatedProps.cdk = updatedProps.cdk ?? {};
     updatedProps.cdk.server = {
       ...updatedProps.cdk.server,
@@ -155,6 +157,9 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
       );
     }
 
+    // If we're using the AWS runner then the build stage will already be inside the VPC and required the proxy but
+    // the HTTP proxy environment variables will be already set in the environment by the pipeline and so the build
+    // stage will inherit that.
     updatedProps.environment = {
       HTTP_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
       HTTPS_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
@@ -167,6 +172,7 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
     !updatedProps.cdk?.revalidation ||
     !("vpc" in updatedProps.cdk.revalidation)
   ) {
+    console.log("adding vpc for revalidation server");
     updatedProps.cdk = props.cdk ?? {};
     updatedProps.cdk.revalidation = {
       ...updatedProps.cdk.revalidation,
