@@ -232,6 +232,8 @@ export function applyConditionalEnvironmentVariables<
         console.log(
           `Setting runtime specific environment variable ${envVarName} to ${envVarValue}`,
         );
+        // @ts-expect-error - blar blar
+        console.log("this", this);
         if (envVarValue !== undefined) {
           console.log("setting");
           origin.function.environment[envVarName] = envVarValue;
