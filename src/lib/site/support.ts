@@ -214,6 +214,8 @@ export function applyConditionalEnvironmentVariables<
       ]),
   );
 
+  console.log("runtimeSpecificEnvVars", runtimeSpecificEnvVars);
+
   // Remove runtime excluded env vars from lambda
   updatedProps.cdk = updatedProps.cdk ?? {};
   const oldTransform = updatedProps.cdk.transform;
@@ -227,6 +229,9 @@ export function applyConditionalEnvironmentVariables<
       for (const [envVarName, envVarValue] of Object.entries(
         runtimeSpecificEnvVars,
       )) {
+        console.log(
+          `Setting runtime specific environment variable ${envVarName} to ${envVarValue}`,
+        );
         if (envVarValue !== undefined) {
           origin.function.environment[envVarName] = envVarValue;
         } else {
@@ -234,6 +239,7 @@ export function applyConditionalEnvironmentVariables<
         }
       }
     }
+    console.log("Transformed plan:", JSON.stringify(plan, null, 2));
   };
 
   // Remove buildtime excluded env vars from environment object which is used during build
