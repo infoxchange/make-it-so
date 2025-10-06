@@ -29,13 +29,20 @@ export class IxNextjsSite extends NextjsSite {
     props: ConstructProps = {},
   ) {
     if (ixDeployConfig.isIxDeploy) {
+      console.log("props before", props);
       props = setupVpcDetails(scope, id, props);
+      console.log("props after", props);
       props = setupCustomDomain(scope, id, props);
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
     }
     props = setupDefaultEnvVars(scope, id, props);
     props = applyConditionalEnvironmentVariables(scope, id, props);
+
+    console.log(
+      "parentCompatibleSsrProps(props)",
+      parentCompatibleSsrProps(props),
+    );
 
     super(scope, id, parentCompatibleSsrProps(props));
 
