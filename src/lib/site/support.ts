@@ -141,38 +141,43 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
   props: Readonly<Props>,
 ): Props {
   const updatedProps: Props = { ...props };
-  const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
-  if (!updatedProps.cdk?.server || !("vpc" in updatedProps.cdk.server)) {
-    updatedProps.cdk = updatedProps.cdk ?? {};
-    updatedProps.cdk.server = {
-      ...updatedProps.cdk.server,
-      vpc: vpcDetails.vpc,
-    };
 
-    if (!ixDeployConfig.vpcHttpProxy) {
-      console.warn(
-        `Attempting to add HTTP proxy environment variables to ${id} but the VPC_HTTP_PROXY env var is not configured.`,
-      );
-    }
-
-    updatedProps.environment = {
-      HTTP_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
-      HTTPS_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
-      http_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
-      https_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
-      ...updatedProps.environment,
-    };
-  }
+  // Don't make any changes if the user has set the VPC manually in any place
   if (
-    !updatedProps.cdk?.revalidation ||
-    !("vpc" in updatedProps.cdk.revalidation)
+    "vpc" in (updatedProps.cdk?.server || {}) ||
+    "vpc" in (updatedProps.cdk?.revalidation || {})
   ) {
-    updatedProps.cdk = props.cdk ?? {};
-    updatedProps.cdk.revalidation = {
-      ...updatedProps.cdk.revalidation,
-      vpc: vpcDetails.vpc,
-    };
+    return updatedProps;
   }
+
+  const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
+
+  updatedProps.cdk = updatedProps.cdk ?? {};
+  updatedProps.cdk.server = {
+    ...updatedProps.cdk.server,
+    vpc: vpcDetails.vpc,
+  };
+  updatedProps.cdk.revalidation = {
+    ...updatedProps.cdk.revalidation,
+    vpc: vpcDetails.vpc,
+  };
+
+  if (!ixDeployConfig.vpcHttpProxy) {
+    console.warn(
+      `Attempting to add HTTP proxy environment variables to ${id} but the VPC_HTTP_PROXY env var is not configured.`,
+    );
+  }
+  // If we're using the AWS runner then the build stage will already be inside the VPC and required the proxy but
+  // the HTTP proxy environment variables will be already set in the environment by the pipeline and so the build
+  // stage will inherit that.
+  updatedProps.environment = {
+    HTTP_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
+    HTTPS_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
+    http_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
+    https_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
+    ...updatedProps.environment,
+  };
+
   return updatedProps;
 }
 
