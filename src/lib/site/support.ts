@@ -173,7 +173,7 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
     !("vpc" in updatedProps.cdk.revalidation)
   ) {
     console.log("adding vpc for revalidation server");
-    updatedProps.cdk = props.cdk ?? {};
+    updatedProps.cdk = updatedProps.cdk ?? {};
     updatedProps.cdk.revalidation = {
       ...updatedProps.cdk.revalidation,
       vpc: vpcDetails.vpc,
