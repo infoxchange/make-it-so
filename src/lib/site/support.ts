@@ -2,6 +2,7 @@ import { Construct } from "constructs";
 import {
   NextjsSite,
   NextjsSiteProps,
+  Stack,
   StaticSite,
   StaticSiteProps,
 } from "sst/constructs";
@@ -13,14 +14,42 @@ import { IxDnsRecord } from "../../cdk-constructs/IxDnsRecord.js";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { convertToBase62Hash } from "../utils/hash.js";
 import { type DistributionDomainProps } from "sst/constructs/Distribution.js";
+import type { Plan as SSTPlan } from "sst/constructs/SsrSite.js";
 
 export type ExtendedCustomDomains = DistributionDomainProps & {
   isIxManagedDomain?: boolean;
   additionalDomainAliases?: string[];
 };
-export type ExtendedNextjsSiteProps = Omit<NextjsSiteProps, "customDomain"> & {
+export type ExtendedNextjsSiteProps = Omit<
+  NextjsSiteProps,
+  "customDomain" | "environment"
+> & {
   customDomain?: string | ExtendedCustomDomains;
+  /**
+   * An object with the key being the environment variable name. The value can either be the environment variable value
+   * as a string or as an object with `buildtime` and/or `runtime` properties where the values of `buildtime` and
+   * `runtime` is the environment variable value that will be used during that step.
+   *
+   * @example
+   * ```js
+   * environment: {
+   *   USER_POOL_CLIENT: auth.cognitoUserPoolClient.userPoolClientId,
+   *   NODE_OPTIONS: {
+   *     buildtime: "--max-old-space-size=4096",
+   *   },
+   *   API_URL: {
+   *     buildtime: "https://external.domain",
+   *     runtime: "https://internal.domain",
+   *   },
+   * },
+   * ```
+   */
+  environment?: Record<
+    string,
+    string | { buildtime?: string; runtime?: string }
+  >;
 };
+
 export type ExtendedStaticSiteProps = Omit<StaticSiteProps, "customDomain"> & {
   customDomain?: string | ExtendedCustomDomains;
 };
@@ -112,23 +141,156 @@ export function setupVpcDetails<Props extends ExtendedNextjsSiteProps>(
   props: Readonly<Props>,
 ): Props {
   const updatedProps: Props = { ...props };
-  const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
-  if (!updatedProps.cdk?.server || !("vpc" in updatedProps.cdk.server)) {
-    updatedProps.cdk = updatedProps.cdk ?? {};
-    updatedProps.cdk.server = {
-      ...updatedProps.cdk.server,
-      vpc: vpcDetails.vpc,
-    };
-  }
+
+  // Don't make any changes if the user has set the VPC manually in any place
   if (
-    !updatedProps.cdk?.revalidation ||
-    !("vpc" in updatedProps.cdk.revalidation)
+    "vpc" in (updatedProps.cdk?.server || {}) ||
+    "vpc" in (updatedProps.cdk?.revalidation || {})
   ) {
-    updatedProps.cdk = props.cdk ?? {};
-    updatedProps.cdk.revalidation = {
-      ...updatedProps.cdk.revalidation,
-      vpc: vpcDetails.vpc,
-    };
+    return updatedProps;
+  }
+
+  const vpcDetails = new IxVpcDetails(scope, id + "-IxVpcDetails");
+
+  updatedProps.cdk = updatedProps.cdk ?? {};
+  updatedProps.cdk.server = {
+    ...updatedProps.cdk.server,
+    vpc: vpcDetails.vpc,
+  };
+  updatedProps.cdk.revalidation = {
+    ...updatedProps.cdk.revalidation,
+    vpc: vpcDetails.vpc,
+  };
+
+  if (!ixDeployConfig.vpcHttpProxy) {
+    console.warn(
+      `Attempting to add HTTP proxy environment variables to ${id} but the VPC_HTTP_PROXY env var is not configured.`,
+    );
+  }
+  // If we're using the AWS runner then the build stage will already be inside the VPC and required the proxy but
+  // the HTTP proxy environment variables will be already set in the environment by the pipeline and so the build
+  // stage will inherit that.
+  updatedProps.environment = {
+    HTTP_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
+    HTTPS_PROXY: { runtime: ixDeployConfig.vpcHttpProxy },
+    http_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
+    https_proxy: { runtime: ixDeployConfig.vpcHttpProxy },
+    ...updatedProps.environment,
+  };
+
+  return updatedProps;
+}
+
+/**
+ * Ensures environment variables that are conditionally included for buildtime or runtime are only used during the
+ * appropriate phase.
+ */
+export function applyConditionalEnvironmentVariables<
+  Props extends ExtendedNextjsSiteProps,
+>(scope: Construct, id: string, props: Readonly<Props>): Props {
+  const updatedProps: Props = { ...props };
+
+  if (!updatedProps.environment) return updatedProps;
+
+  const buildtimeSpecificEnvVars = Object.fromEntries(
+    Object.entries(updatedProps.environment)
+      .filter(([, value]) => typeof value === "object")
+      .map(([varName, value]) => [
+        varName,
+        typeof value === "object" && "buildtime" in value
+          ? value.buildtime
+          : undefined,
+      ]),
+  );
+
+  const runtimeSpecificEnvVars = Object.fromEntries(
+    Object.entries(updatedProps.environment)
+      .filter(([, value]) => typeof value === "object")
+      .map(([varName, value]) => [
+        varName,
+        typeof value === "object" && "runtime" in value
+          ? value.runtime
+          : undefined,
+      ]),
+  );
+
+  // Remove runtime excluded env vars from lambda
+  updatedProps.cdk = updatedProps.cdk ?? {};
+  const oldTransform = updatedProps.cdk.transform;
+  updatedProps.cdk.transform = (plan: SSTPlan) => {
+    oldTransform?.(plan);
+
+    for (const origin of Object.values(plan.origins)) {
+      if (!("function" in origin) || !origin.function.environment) {
+        continue;
+      }
+      for (const [envVarName, envVarValue] of Object.entries(
+        runtimeSpecificEnvVars,
+      )) {
+        if (envVarValue !== undefined) {
+          origin.function.environment[envVarName] = envVarValue;
+        } else {
+          // @ts-expect-error - Environment values should generally only be strings but we need to set it to undefined
+          // as a workaround to override any environment variables that are mixed in during function creation which are
+          // only meant to be included at build time.
+          // https://github.com/sst/v2/blob/d0c9d5c1cbf8016b2a2b7ed2e247c27546b40387/packages/sst/src/constructs/SsrSite.ts#L1029
+          origin.function.environment[envVarName] = undefined;
+        }
+      }
+    }
+  };
+
+  // Remove buildtime excluded env vars from environment object which is used during build
+  for (const [envVarName, envVarValue] of Object.entries(
+    buildtimeSpecificEnvVars,
+  )) {
+    if (envVarValue !== undefined) {
+      updatedProps.environment[envVarName] = envVarValue;
+    } else {
+      delete updatedProps.environment[envVarName];
+    }
+  }
+
+  return updatedProps;
+}
+
+/**
+ * Before props reach this function they should have already been converted into something compatible with the parent
+ * SST construct. This function verifies that's the case and updates the type if so.
+ */
+export function parentCompatibleSsrProps<
+  Props extends ExtendedNextjsSiteProps,
+  ResultProps = Omit<Props, "environment"> & {
+    environment?: Record<string, string>;
+  },
+>(props: Readonly<Props>): ResultProps {
+  for (const value of Object.values(props.environment ?? {})) {
+    if (typeof value !== "string") {
+      throw new Error(
+        "Internal make-it-so error: The environment prop contains buildtime/runtime specific environment variables which cannot be passed to the parent NextjsSite construct. Please use the applyConditionalEnvironmentVariables function to ensure only appropriate environment variables are included.",
+      );
+    }
+  }
+  return props as ResultProps;
+}
+
+export function setupDefaultEnvVars<Props extends ExtendedNextjsSiteProps>(
+  scope: Construct | Stack,
+  id: string,
+  props: Readonly<Props>,
+): Props {
+  const updatedProps: Props = { ...props };
+  // NextjsSite functions to not use default env var unfortunately so we have to
+  // explicitly set them ourselves https://github.com/sst/sst/issues/2359
+  if ("defaultFunctionProps" in scope) {
+    for (const funcProps of scope.defaultFunctionProps) {
+      const defaultFunctionEnvVars = { ...funcProps.environment };
+
+      updatedProps.environment = {
+        ...defaultFunctionEnvVars,
+        ...updatedProps.environment,
+      };
+    }
   }
   return updatedProps;
 }

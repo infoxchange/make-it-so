@@ -13,6 +13,9 @@ import {
   setupDnsRecords,
   setupDomainAliasRedirect,
   setupVpcDetails,
+  setupDefaultEnvVars,
+  applyConditionalEnvironmentVariables,
+  parentCompatibleSsrProps,
 } from "../lib/site/support.js";
 
 type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
@@ -31,8 +34,10 @@ export class IxNextjsSite extends NextjsSite {
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
     }
+    props = setupDefaultEnvVars(scope, id, props);
+    props = applyConditionalEnvironmentVariables(scope, id, props);
 
-    super(scope, id, props);
+    super(scope, id, parentCompatibleSsrProps(props));
 
     if (ixDeployConfig.isIxDeploy) {
       setupDnsRecords(this, scope, id, props);

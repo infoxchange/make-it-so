@@ -59,23 +59,30 @@ if (deployConfig.isIxDeploy) {
 <details>
 <summary><strong>IxNextjsSite</strong> - Deploys a serverless instance of a Next.js.</summary>
 
-IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) and takes the same props with the addition of `isIxManagedDomain` in the `customDomain` property.
+IxNextjsSite extends [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite) with a few minor changes to the props
+and behaviour.
 
-If the props `customDomain` is not set then the first site domain provided by the IX deployment pipeline will be used as the primary custom domain, any additional domains (if there are any) will be used as alternative domain names and the first pipeline provided domain alias domain will be used will be used as a domain alias. This behaviour of setting pipeline configuring custom domains can be avoided by providing a value for `customDomain` (including explicitly setting it to `undefined` which will ensure no customDomain is used).
+If the `customDomain` prop is not set then the first site domain provided by the IX deployment pipeline will be used as the primary custom domain, any additional domains (if there are any) will be used as alternative domain names and the first pipeline provided domain alias domain will be used will be used as a domain alias. This behaviour of setting pipeline configuring custom domains can be avoided by providing a value for `customDomain` (including explicitly setting it to `undefined` which will ensure no customDomain is used).
 
 If `isIxManagedDomain` is true (which is the case if `customDomain` is set automatically using pipeline provided values) and no custom certificate is given then one will be created for any custom domains given (including alternative domain names which the base SST construct doesn't currently do).
 
 Also if `isIxManagedDomain` is true DNS records will be automatically created for them.
 
-It will also automatically attach the site to the standard IX VPC created in each workload account (unless you explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`).
+It will also automatically attach the site to the standard IX VPC created in each workload account (unless you
+explicitly pass other VPC details or set the VPC-related props (see the SST doco) to `undefined`) and set the env vars
+`HTTP_PROXY`, `http_proxy`, `HTTPS_PROXY` and `https_proxy` to the HTTP Proxy for the VPC.
+
+Unlike [NextjsSite](https://v2.sst.dev/constructs/NextjsSite), any environment variables set with `stackOrApp.setDefaultFunctionProps()` or
+`stackOrApp.addDefaultFunctionEnv()` will be inherited by the IxNextjsSite lambda functions.
 
 #### Options:
 
-| Prop                                 | Type     | Description                                                                                                                                                                                         |
-| ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [...NextjsSiteProps]                 |          | Any props accepted by [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite)                                                                                                                  |
-| customDomain.isIxManagedDomain       | boolean  | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them |
-| customDomain.additionalDomainAliases | string[] | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                |
+| Prop                                 | Type                                                             | Description                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [...NextjsSiteProps]                 |                                                                  | Any props accepted by [SST's NextjsSite](https://v2.sst.dev/constructs/NextjsSite)                                                                                                                                                                                                                                         |
+| customDomain.isIxManagedDomain       | boolean                                                          | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them                                                                                                                        |
+| customDomain.additionalDomainAliases | string[]                                                         | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                                                                                                                                       |
+| environment                          | Record<string, string \| {buildtime?: string, runtime?: string}> | (optional) As well as accepting strings for environment variable values as is already done by [NextjsSite](https://v2.sst.dev/constructs/NextjsSite) it also accepts an object with the properties `buildtime` and/or `runtime` which allows you to customise the environment variable value during those different steps. |
 
 ```typescript
 import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
@@ -85,7 +92,7 @@ const site = new IxNextjsSite(stack, "Site", {
     DATABASE_URL: process.env.DATABASE_URL || "",
     SESSION_SECRET: process.env.SESSION_SECRET || "",
   },
-  // Included by default:
+  // The default behaviour is the same as if you included:
   // customDomain: {
   //   domainName: ixDeployConfig.siteDomains[0],
   //   alternateNames: ixDeployConfig.siteDomains.slice(1)
@@ -121,7 +128,7 @@ const site = new IxStaticSite(stack, "Site", {
   environment: {
     DOOHICKEY_NAME: process.env.DOOHICKEY_NAME || "",
   },
-  // Included by default:
+  // The default behaviour is the same as if you included:
   // customDomain: {
   //   domainName: ixDeployConfig.siteDomains[0],
   //   alternateNames: ixDeployConfig.siteDomains.slice(1)
@@ -142,7 +149,7 @@ It will automatically create certificates and DNS records for a single domain th
 import { IxApi } from "@infoxchange/make-it-so/cdk-constructs";
 
 const site = new IxApi(stack, "api", {
-  // Included by default:
+  // The default behaviour is the same as if you included:
   // customDomain: {
   //   domainName: ixDeployConfig.siteDomains[0],
   // },
