@@ -26,10 +26,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Get node version
+        id: get-node-version
+        shell: bash
+        run: echo "node-version=$(jq -r '.engines.node // "lts/*"' package.json)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: "package.json"
+          # We could use `node-version-file: "package.json"` here but that will give a warning if there's no version
+          # specified rather than just silently defaulting to "lts/*"
+          node-version: ${{ steps.get-node-version.outputs.node-version }}
 
       - name: Install dependencies
         run: npm clean-install
@@ -45,3 +52,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: Print publish info
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          if [[ ! "$VERSION" == 0.0.0* ]]; then
+            echo -e "### :rocket: Published new version: \n\`\`\`\n$VERSION\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### No publishable changes made since last version" >> $GITHUB_STEP_SUMMARY
+          fi
