@@ -57,3 +57,4 @@ jobs:
         run: |
           VERSION=$(jq -r '.version' package.json)
           echo "::notice title=Package Version::Published version $VERSION"
+          echo "### Hello world! :rocket:" >> $GITHUB_STEP_SUMMARY
