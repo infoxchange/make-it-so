@@ -45,3 +45,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: Get version and create annotation
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "::notice title=Package Version::Published version $VERSION"
