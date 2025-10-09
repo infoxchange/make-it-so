@@ -57,7 +57,7 @@ jobs:
         run: |
           VERSION=$(jq -r '.version' package.json)
           if [[ ! "$VERSION" == 0.0.0* ]]; then
-            echo "### :rocket: Published version \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo -e "### :rocket: Published new version: \n\`\`\`\n$VERSION\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           else
             echo "### No publishable changes made since last version" >> $GITHUB_STEP_SUMMARY
           fi
