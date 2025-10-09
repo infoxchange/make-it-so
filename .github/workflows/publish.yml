@@ -56,5 +56,6 @@ jobs:
       - name: Get version and create annotation
         run: |
           VERSION=$(jq -r '.version' package.json)
-          echo "::notice title=Package Version::Published version $VERSION"
-          echo "### Hello world! :rocket:" >> $GITHUB_STEP_SUMMARY
+          if [[ ! "$VERSION" == 0.0.0* ]]; then
+            echo "### :rocket: Published version: $VERSION" >> $GITHUB_STEP_SUMMARY
+          fi
