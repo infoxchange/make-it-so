@@ -20,7 +20,9 @@ yarn add --dev @infoxchange/make-it-so
 The IX pipeline provides certain information about the deployment currently in progress via environment variables. deployConfig gives you a friendly (and typed) way to access these details.
 
 ```typescript
-import deployConfig from "@infoxchange/make-it-so/deployConfig";
+import deployConfig, {
+  getDeployConfig,
+} from "@infoxchange/make-it-so/deployConfig";
 
 if (deployConfig.isIxDeploy) {
   console.log(
@@ -29,6 +31,10 @@ if (deployConfig.isIxDeploy) {
 } else {
   console.log(`Not deploying via the IX deploy pipeline`);
 }
+
+// Will return the same object but calculated when the function is run rather than when imported. Useful if any IX
+// deployment related environment variables are changed at runtime.
+console.log(getDeployConfig());
 ```
 
 <details>

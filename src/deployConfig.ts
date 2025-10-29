@@ -1,23 +1,24 @@
 import { z } from "zod";
 
-const envVars = {
-  isIxDeploy: process.env.IX_DEPLOYMENT?.toLowerCase() === "true", // This needs to start as a bool for the discriminated union
-  appName: process.env.IX_APP_NAME ?? "",
-  environment: process.env.IX_ENVIRONMENT ?? "",
-  workloadGroup: process.env.IX_WORKLOAD_GROUP ?? "",
-  primaryAwsRegion: process.env.IX_PRIMARY_AWS_REGION ?? "",
-  siteDomains: process.env.IX_SITE_DOMAINS ?? "",
-  siteDomainAliases: process.env.IX_SITE_DOMAIN_ALIASES ?? "",
-  isInternalApp: process.env.IX_INTERNAL_APP ?? "",
-  deploymentType: process.env.IX_DEPLOYMENT_TYPE ?? "",
-  sourceCommitRef: process.env.IX_SOURCE_COMMIT_REF ?? "",
-  sourceCommitHash: process.env.IX_SOURCE_COMMIT_HASH ?? "",
-  deployTriggeredBy: process.env.IX_DEPLOY_TRIGGERED_BY ?? "",
-  smtpHost: process.env.SMTP_HOST ?? "",
-  smtpPort: process.env.SMTP_PORT ?? "",
-  clamAVUrl: process.env.CLAMAV_URL ?? "",
-  vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
-} satisfies Record<string, string | boolean>;
+const getEnvVars = () =>
+  ({
+    isIxDeploy: process.env.IX_DEPLOYMENT?.toLowerCase() === "true", // This needs to start as a bool for the discriminated union
+    appName: process.env.IX_APP_NAME ?? "",
+    environment: process.env.IX_ENVIRONMENT ?? "",
+    workloadGroup: process.env.IX_WORKLOAD_GROUP ?? "",
+    primaryAwsRegion: process.env.IX_PRIMARY_AWS_REGION ?? "",
+    siteDomains: process.env.IX_SITE_DOMAINS ?? "",
+    siteDomainAliases: process.env.IX_SITE_DOMAIN_ALIASES ?? "",
+    isInternalApp: process.env.IX_INTERNAL_APP ?? "",
+    deploymentType: process.env.IX_DEPLOYMENT_TYPE ?? "",
+    sourceCommitRef: process.env.IX_SOURCE_COMMIT_REF ?? "",
+    sourceCommitHash: process.env.IX_SOURCE_COMMIT_HASH ?? "",
+    deployTriggeredBy: process.env.IX_DEPLOY_TRIGGERED_BY ?? "",
+    smtpHost: process.env.SMTP_HOST ?? "",
+    smtpPort: process.env.SMTP_PORT ?? "",
+    clamAVUrl: process.env.CLAMAV_URL ?? "",
+    vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
+  }) satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
   .object({
@@ -41,7 +42,7 @@ const ixDeployConfigSchema = z
     smtpPort: z.coerce.number().int(),
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
-  } satisfies Record<keyof typeof envVars, unknown>)
+  } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
 const nonIxDeployConfigSchema = z
@@ -72,7 +73,7 @@ const nonIxDeployConfigSchema = z
       ),
     clamAVUrl: z.string(),
     vpcHttpProxy: z.string(),
-  } satisfies Record<keyof typeof envVars, unknown>)
+  } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
 const schema = z.discriminatedUnion("isIxDeploy", [
@@ -80,4 +81,7 @@ const schema = z.discriminatedUnion("isIxDeploy", [
   nonIxDeployConfigSchema,
 ]);
 
-export default schema.parse(envVars);
+export default schema.parse(getEnvVars());
+
+// process.env values can change at runtime so we provide a way to re-parse the config as needed
+export const getDeployConfig = () => schema.parse(getEnvVars());
