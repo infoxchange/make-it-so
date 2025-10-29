@@ -6,3 +6,4 @@ export * from "./IxStaticSite.js";
 export * from "./IxElasticache.js";
 export * from "./IxApi.js";
 export * from "./IxQuicksightWorkspace.js";
+export * from "./CloudWatchOidcAuth/index.js";
