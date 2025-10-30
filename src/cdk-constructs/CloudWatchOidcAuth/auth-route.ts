@@ -31,7 +31,7 @@ export const handler = addRequiredContext(
         clientID: oidcClientId,
         scope: oidcScope,
         onSuccess: async (tokenset, client) => {
-          console.log("🟢", client);
+          console.log("🟣", client);
           // Payload to include in the token
           const payload = {
             userID: tokenset.claims().sub,

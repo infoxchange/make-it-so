@@ -47,12 +47,6 @@ export class CloudWatchOidcAuth extends Construct {
       prefix = "/auth",
     }: { distributionDefinition: Mutable<DistributionProps>; prefix?: string },
   ) {
-    console.log(
-      "------",
-      import.meta.dirname,
-      import.meta.url,
-      import.meta.filename,
-    );
     const updatedDistributionDefinition = { ...distributionDefinition };
     const behaviourName = `${prefix.replace(/^\//g, "")}/*`;
     updatedDistributionDefinition.additionalBehaviors =
@@ -193,7 +187,7 @@ export class CloudWatchOidcAuth extends Construct {
     }
     fn.addEnvironment("NODE_OPTIONS", "--require=@aws-sdk/signature-v4-crt");
 
-    const edgeFuncAuthCheck = new CloudFront.Function(
+    const authCheckFunction = new CloudFront.Function(
       scope,
       `${this.id}AuthCheckFunction`,
       {
@@ -206,7 +200,7 @@ export class CloudWatchOidcAuth extends Construct {
     );
 
     return {
-      function: edgeFuncAuthCheck,
+      function: authCheckFunction,
       eventType: CloudFront.FunctionEventType.VIEWER_REQUEST,
     };
   }
@@ -216,7 +210,7 @@ export class CloudWatchOidcAuth extends Construct {
     jwtSecret: SecretsManager.Secret,
     prefix: string,
   ): CloudFront.BehaviorOptions {
-    const edgeFuncAuth = new SST.Function(scope, `${this.id}EdgeFunctionAuth`, {
+    const authRouteFunction = new SST.Function(scope, `${this.id}AuthRouteFunction`, {
       runtime: "nodejs20.x",
       handler: path.join(import.meta.dirname, "auth-route.handler"),
       environment: {
@@ -227,7 +221,7 @@ export class CloudWatchOidcAuth extends Construct {
       },
     });
 
-    // edgeFuncAuth uses SST's AuthHandler construct which is normally run inside a lambda that's
+    // authRouteFunction uses SST's AuthHandler construct which is normally run inside a lambda that's
     // created by SST's Auth construct. AuthHandler expects certain environment variables to be set
     // by the Auth construct so we have to set them ourselves here to keep it happy.
     const envVarName = SSTInternalConfig.envFor({
@@ -235,9 +229,9 @@ export class CloudWatchOidcAuth extends Construct {
       id: "id", // It seems like the env var will still be found no matter what this value is
       prop: "prefix",
     });
-    edgeFuncAuth.addEnvironment(envVarName, prefix);
+    authRouteFunction.addEnvironment(envVarName, prefix);
 
-    const edgeFuncAuthUrl = edgeFuncAuth.addFunctionUrl({
+    const authRouteFunctionUrl = authRouteFunction.addFunctionUrl({
       authType: Lambda.FunctionUrlAuthType.NONE,
     });
     const forwardHostHeaderCfFunction = new CloudFront.Function(
@@ -257,7 +251,7 @@ export class CloudWatchOidcAuth extends Construct {
 
     return {
       origin: new CloudFrontOrigins.HttpOrigin(
-        CDK.Fn.parseDomainName(edgeFuncAuthUrl.url),
+        CDK.Fn.parseDomainName(authRouteFunctionUrl.url),
       ),
       allowedMethods: CloudFront.AllowedMethods.ALLOW_ALL,
       cachePolicy: new CloudFront.CachePolicy(
