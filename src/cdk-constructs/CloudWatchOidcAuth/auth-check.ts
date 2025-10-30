@@ -1,4 +1,7 @@
 // Based off: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/example_cloudfront_functions_kvs_jwt_verify_section.html
+// Note that as a CloudFront Function, this code has limitations compared to a Lambda@Edge function.
+// For example, no external libraries can be used, and the runtime is more limited.
+
 
 import crypto from "crypto";
 import cf from "cloudfront";
@@ -92,7 +95,7 @@ function _base64urlDecode(str: string) {
   return Buffer.from(str, "base64url").toString();
 }
 
-export const handler = async (event: AWSCloudFrontFunction.Event, context: AWSCloudFrontFunction.Context) => {
+async function handler(event: AWSCloudFrontFunction.Event, context: AWSCloudFrontFunction.Context) {
   console.log("🟢 Auth check event:", event);
   console.log("🔵 Auth check context:", context);
   const request = event.request;
@@ -106,7 +109,7 @@ export const handler = async (event: AWSCloudFrontFunction.Event, context: AWSCl
   // console.log(request.cookies);
   // console.log(request.cookies["auth-token"]);
   // console.log(Object.keys(request.cookies));
-  const jwtToken = request.cookies["auth-token"]?.value;
+  const jwtToken = request.cookies["auth-token"] && request.cookies["auth-token"].value;
   console.log("jwtToken:", jwtToken);
   // console.log(Object.keys(request.cookies));
 
@@ -139,8 +142,14 @@ async function getSecret() {
   }
 }
 
-const log: typeof console.log = (...args) => {
+const log: typeof console.log = function () {
   if (loggingEnabled) {
-    console.log(...args);
+    // @ts-expect-error We can't use spread or rest parameters in CloudFront Functions
+    // eslint-disable-next-line prefer-spread, prefer-rest-params
+    console.log.apply(console, arguments);
   }
 }
+
+// This serves no purpose other than to make TypeScript and eslint happy by showing that that handler is used. We can't
+// export handler as an alterative because CloudFront Functions don't support exports.
+handler;

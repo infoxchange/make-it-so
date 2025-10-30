@@ -195,7 +195,7 @@ export class CloudWatchOidcAuth extends Construct {
 
     const edgeFuncAuthCheck = new CloudFront.Function(
       scope,
-      `${this.id}EdgeFunctionAuthCheck`,
+      `${this.id}AuthCheckFunction`,
       {
         code: CloudFront.FunctionCode.fromInline(
           fs.readFileSync(path.join(import.meta.dirname, "auth-check.js"), "utf8").replace("__placeholder-for-jwt-secret-key__", key),
