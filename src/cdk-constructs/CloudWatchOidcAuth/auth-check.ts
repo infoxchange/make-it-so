@@ -2,7 +2,6 @@
 
 import crypto from "crypto";
 import cf from "cloudfront";
-import { ApiHandler, useCookie } from "sst/node/api";
 
 //Response when JWT is not valid.
 const redirectResponse = {
@@ -93,8 +92,9 @@ function _base64urlDecode(str: string) {
   return Buffer.from(str, "base64url").toString();
 }
 
-export const handler = ApiHandler(async (event) => {
-  console.log("Auth check event:", event);
+export const handler = async (event: AWSCloudFrontFunction.Event, context: AWSCloudFrontFunction.Context) => {
+  console.log("🟢 Auth check event:", event);
+  console.log("🔵 Auth check context:", context);
   const request = event.request;
   const secret_key = await getSecret();
 
@@ -106,7 +106,7 @@ export const handler = ApiHandler(async (event) => {
   // console.log(request.cookies);
   // console.log(request.cookies["auth-token"]);
   // console.log(Object.keys(request.cookies));
-  const jwtToken = useCookie("auth-token");
+  const jwtToken = request.cookies["auth-token"]?.value;
   console.log("jwtToken:", jwtToken);
   // console.log(Object.keys(request.cookies));
 
@@ -126,7 +126,7 @@ export const handler = ApiHandler(async (event) => {
   // delete request.querystring.jwt;
   log("Valid JWT token");
   return request;
-})
+}
 
 // Get secret from key value store
 async function getSecret() {

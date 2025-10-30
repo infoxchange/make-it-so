@@ -23,7 +23,7 @@ const oidcIssuerConfigUrl = new URL(
   `${process.env.OIDC_ISSUER_URL?.replace(/\/$/, "")}/.well-known/openid-configuration`,
 );
 
-export const handler = convertApiGatewayHandlerToCloudFrontHandler(
+export const handler = addRequiredContext(
   AuthHandler({
     providers: {
       oidc: OidcAdapter({
@@ -33,7 +33,7 @@ export const handler = convertApiGatewayHandlerToCloudFrontHandler(
         onSuccess: async (tokenset) => {
           console.log("tokenset", tokenset, tokenset.claims());
 
-          console.log("Config.jwtSecret:", jwtSecret);
+          // console.log("Config.jwtSecret:", jwtSecret);
 
           // Payload to include in the token
           const payload = {
@@ -49,7 +49,6 @@ export const handler = convertApiGatewayHandlerToCloudFrontHandler(
           // Create the token
           const token = jwt.sign(payload, jwtSecret, options);
           const expires = new Date(
-            // @ ts-ignore error in GH action
             Date.now() + 1000 * 60 * 60 * 24 * 7,
           );
           return {
@@ -61,37 +60,20 @@ export const handler = convertApiGatewayHandlerToCloudFrontHandler(
               `auth-token=${token}; HttpOnly; SameSite=None; Secure; Path=/; Expires=${expires}`,
             ],
           };
-          // return Session.cookie({
-          //   redirect: "https://openidconnect.net/callback",
-          //   type: "public",
-          //   properties: {
-          //     userID: tokenset.claims().sub,
-          //   },
-          // });
         },
       }),
     },
   }),
 );
 
-// @ts-expect-error - testing
-function convertApiGatewayHandlerToCloudFrontHandler(callback) {
-  // @ts-expect-error - testing
-  return async function (event, context) {
+function addRequiredContext(handler: ReturnType<typeof AuthHandler>): ReturnType<typeof AuthHandler> {
+  return async function (...args) {
+    const [event, context] = args;
     // Used by AuthHandler to create callback url sent to oidc server
     event.requestContext.domainName = event.headers["x-forwarded-host"];
-    console.log("----", event, context);
-    // console.log("event", event)
-    // console.log("context", context)
-    const response = await callback(event, context);
-    // if (response.cookies) {
-    //   if (!response.headers) {
-    //     response.headers = {}
-    //   }
-    //   response.headers["set-cookie"] = response.cookies
-    // }
-    // response.headers.location += "&cake=blar"
-    // response.headers.foo = "bar"
-    return response;
+    console.log("🟢 event", event)
+    console.log("🔵 context", context)
+
+    return await handler(...args);
   };
 }
