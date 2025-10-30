@@ -1,30 +1,22 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 // Based off: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/example_cloudfront_functions_kvs_jwt_verify_section.html
 
 import crypto from "crypto";
-// @ts-expect-error -- This library only exists in the CloudFront Functions runtime that this code runs in
 import cf from "cloudfront";
+import { ApiHandler, useCookie } from "sst/node/api";
 
 //Response when JWT is not valid.
-// const response401 = {
-//     statusCode: 401,
-//     statusDescription: 'Unauthorized'
-// };
-const response401 = {
+const redirectResponse = {
   statusCode: 302,
   headers: {
     location: { value: "/auth/oidc/authorize" },
   },
 };
 
-// Remember to associate the KVS with your function before calling the const kvsKey = 'jwt.secret'.
-// https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/kvs-with-functions-associate.html
 const kvsKey = "__placeholder-for-jwt-secret-key__";
 // set to true to enable console logging
-const loggingEnabled = true; // false;
+const loggingEnabled = false;
 
-function jwt_decode(token, key, noVerify, algorithm) {
+function jwtDecode(token: string, key: string, noVerify?: boolean) {
   // check token
   if (!token) {
     throw new Error("No token supplied");
@@ -43,26 +35,28 @@ function jwt_decode(token, key, noVerify, algorithm) {
   // base64 decode and parse JSON
   const payload = JSON.parse(_base64urlDecode(payloadSeg));
 
-  if (!noVerify) {
-    const signingMethod = "sha256";
-    const signingType = "hmac";
+  if (noVerify) {
+    return payload;
+  }
 
-    // Verify signature. `sign` will return base64 string.
-    const signingInput = [headerSeg, payloadSeg].join(".");
+  const signingMethod = "sha256";
+  const signingType = "hmac";
 
-    if (!_verify(signingInput, key, signingMethod, signingType, signatureSeg)) {
-      throw new Error("Signature verification failed");
-    }
+  // Verify signature. `sign` will return base64 string.
+  const signingInput = [headerSeg, payloadSeg].join(".");
 
-    // Support for nbf and exp claims.
-    // According to the RFC, they should be in seconds.
-    if (payload.nbf && Date.now() < payload.nbf * 1000) {
-      throw new Error("Token not yet active");
-    }
+  if (!_verify(signingInput, key, signingMethod, signingType, signatureSeg)) {
+    throw new Error("Signature verification failed");
+  }
 
-    if (payload.exp && Date.now() > payload.exp * 1000) {
-      throw new Error("Token expired");
-    }
+  // Support for nbf and exp claims.
+  // According to the RFC, they should be in seconds.
+  if (payload.nbf && Date.now() < payload.nbf * 1000) {
+    throw new Error("Token not yet active");
+  }
+
+  if (payload.exp && Date.now() > payload.exp * 1000) {
+    throw new Error("Token expired");
   }
 
   return payload;
@@ -70,7 +64,7 @@ function jwt_decode(token, key, noVerify, algorithm) {
 
 //Function to ensure a constant time comparison to prevent
 //timing side channels.
-function _constantTimeEquals(a, b) {
+function _constantTimeEquals(a: string, b: string) {
   if (a.length != b.length) {
     return false;
   }
@@ -83,7 +77,7 @@ function _constantTimeEquals(a, b) {
   return 0 === xor;
 }
 
-function _verify(input, key, method, type, signature) {
+function _verify(input: string, key: string, method: string, type: string, signature: string) {
   if (type === "hmac") {
     return _constantTimeEquals(signature, _sign(input, key, method));
   } else {
@@ -91,60 +85,50 @@ function _verify(input, key, method, type, signature) {
   }
 }
 
-function _sign(input, key, method) {
+function _sign(input: string, key: string, method: string) {
   return crypto.createHmac(method, key).update(input).digest("base64url");
 }
 
-function _base64urlDecode(str) {
-  return Buffer.from(str, "base64url");
+function _base64urlDecode(str: string) {
+  return Buffer.from(str, "base64url").toString();
 }
 
-async function handler(event) {
+export const handler = ApiHandler(async (event) => {
   const request = event.request;
-
-  //Secret key used to verify JWT token.
-  //Update with your own key.
   const secret_key = await getSecret();
 
   if (!secret_key) {
-    return response401;
+    return redirectResponse;
   }
 
-  console.log("request");
-  console.log(request);
-  console.log(request.cookies);
-  console.log(request.cookies["auth-token"]);
-  console.log(Object.keys(request.cookies));
-  // console.logObject.keys(request.cookies))
+  // console.log(request);
+  // console.log(request.cookies);
+  // console.log(request.cookies["auth-token"]);
+  // console.log(Object.keys(request.cookies));
+  const jwtToken = useCookie("auth-token");
+  console.log("jwtToken:", jwtToken);
+  // console.log(Object.keys(request.cookies));
 
   // If no JWT token, then generate HTTP redirect 401 response.
-  if (!request.cookies["auth-token"]) {
+  if (!jwtToken) {
     log("Error: No JWT in the cookies");
-    return response401;
+    return redirectResponse;
   }
-
-  const jwtToken = request.cookies["auth-token"].value;
-
   try {
-    jwt_decode(jwtToken, secret_key);
+    jwtDecode(jwtToken, secret_key);
   } catch (e) {
     log(e);
-    return response401;
+    return redirectResponse;
   }
 
-  //Remove the JWT from the query string if valid and return.
-  delete request.querystring.jwt;
+  // //Remove the JWT from the query string if valid and return.
+  // delete request.querystring.jwt;
   log("Valid JWT token");
   return request;
-}
+})
 
-const publicKey = `very-secret`;
-
-// get secret from key value store
+// Get secret from key value store
 async function getSecret() {
-  //   console.log("auth key is:", publicKey)
-  //   return publicKey
-  // initialize cloudfront kv store and get the key value
   try {
     const kvsHandle = cf.kvs();
     return await kvsHandle.get(kvsKey);
@@ -154,8 +138,8 @@ async function getSecret() {
   }
 }
 
-function log(message) {
+const log: typeof console.log = (...args) => {
   if (loggingEnabled) {
-    console.log(message);
+    console.log(...args);
   }
 }
