@@ -290,6 +290,30 @@ const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 
 </details>
 
+<details>
+<summary><strong>CloudFrontOidcAuth</strong> - Adds OIDC authentication to a CloudFront distribution.</summary>
+
+```typescript
+import { CloudWatchOidcAuth } from "@infoxchange/make-it-so/cdk-constructs";
+
+// You first create an instance of CloudFrontOidcAuth
+const auth = new CloudFrontOidcAuth(stack, "CloudFrontOidcAuth", {
+  oidcIssuerUrl: "https://your-oidc-server.com/path/",
+  oidcClientId: "your-client-id",
+  oidcScope: "email",
+});
+
+// Then you apply it to the a CloudFront backed site when it's created
+const site = new IxStaticSite(stack, "IxStaticSite", {
+  path: "path/to/site/files",
+  cdk: {
+    distribution: auth.addToDistributionDefinition(stack, {
+      distributionDefinition: {},
+    }),
+  },
+});
+```
+
 ## Full Example
 
 To deploy a Next.js based site you would include a `sst.config.ts` file at the root of repo with contents like this:
