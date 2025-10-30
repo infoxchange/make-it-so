@@ -1,28 +1,27 @@
 import { AuthHandler, OidcAdapter } from "sst/node/auth";
 import { Issuer } from "openid-client";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
-const oidcClientId = process.env.OIDC_CLIENT_ID
+const oidcClientId = process.env.OIDC_CLIENT_ID;
 if (!oidcClientId) {
   throw new Error("OIDC_CLIENT_ID not set");
 }
-const oidcIssuerUrl = process.env.OIDC_ISSUER_URL
+const oidcIssuerUrl = process.env.OIDC_ISSUER_URL;
 if (!oidcIssuerUrl) {
   throw new Error("OIDC_ISSUER_URL not set");
 }
-const oidcScope = process.env.OIDC_SCOPE
+const oidcScope = process.env.OIDC_SCOPE;
 if (!oidcScope) {
   throw new Error("OIDC_SCOPE not set");
 }
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
   throw new Error("JWT_SECRET not set");
 }
 
-
-
-
-const oidcIssuerConfigUrl = new URL(`${process.env.OIDC_ISSUER_URL?.replace(/\/$/, "")}/.well-known/openid-configuration`);
+const oidcIssuerConfigUrl = new URL(
+  `${process.env.OIDC_ISSUER_URL?.replace(/\/$/, "")}/.well-known/openid-configuration`,
+);
 
 export const handler = convertApiGatewayHandlerToCloudFrontHandler(
   AuthHandler({
@@ -39,19 +38,19 @@ export const handler = convertApiGatewayHandlerToCloudFrontHandler(
           // Payload to include in the token
           const payload = {
             userID: tokenset.claims().sub,
-          }
+          };
 
           // Options (optional)
           const options = {
-            algorithm: 'HS256',
-            expiresIn: '1h',
+            algorithm: "HS256",
+            expiresIn: "1h",
           } as const;
 
           // Create the token
           const token = jwt.sign(payload, jwtSecret, options);
           const expires = new Date(
             // @ ts-ignore error in GH action
-            Date.now() + (1000 * 60 * 60 * 24 * 7)
+            Date.now() + 1000 * 60 * 60 * 24 * 7,
           );
           return {
             statusCode: 302,
@@ -70,21 +69,21 @@ export const handler = convertApiGatewayHandlerToCloudFrontHandler(
           //   },
           // });
         },
-      })
+      }),
     },
-  })
-)
+  }),
+);
 
 // @ts-expect-error - testing
 function convertApiGatewayHandlerToCloudFrontHandler(callback) {
   // @ts-expect-error - testing
   return async function (event, context) {
     // Used by AuthHandler to create callback url sent to oidc server
-    event.requestContext.domainName = event.headers['x-forwarded-host']
-    console.log('----', event, context)
+    event.requestContext.domainName = event.headers["x-forwarded-host"];
+    console.log("----", event, context);
     // console.log("event", event)
     // console.log("context", context)
-    const response = await callback(event, context)
+    const response = await callback(event, context);
     // if (response.cookies) {
     //   if (!response.headers) {
     //     response.headers = {}
@@ -93,6 +92,6 @@ function convertApiGatewayHandlerToCloudFrontHandler(callback) {
     // }
     // response.headers.location += "&cake=blar"
     // response.headers.foo = "bar"
-    return response
-  }
+    return response;
+  };
 }
