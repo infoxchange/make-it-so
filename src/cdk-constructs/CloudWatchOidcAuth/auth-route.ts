@@ -30,34 +30,31 @@ export const handler = addRequiredContext(
         issuer: await Issuer.discover(oidcIssuerConfigUrl.href),
         clientID: oidcClientId,
         scope: oidcScope,
-        onSuccess: async (tokenset) => {
-          console.log("tokenset", tokenset, tokenset.claims());
-
-          // console.log("Config.jwtSecret:", jwtSecret);
-
+        onSuccess: async (tokenset, client) => {
+          console.log("🟢", client);
           // Payload to include in the token
           const payload = {
             userID: tokenset.claims().sub,
           };
-
-          // Options (optional)
-          const options = {
-            algorithm: "HS256",
-            expiresIn: "1h",
-          } as const;
+          const expiresInMs = 1000 * 60 * 60;
 
           // Create the token
-          const token = jwt.sign(payload, jwtSecret, options);
-          const expires = new Date(
-            Date.now() + 1000 * 60 * 60 * 24 * 7,
+          const token = jwt.sign(
+            payload,
+            jwtSecret,
+            {
+              algorithm: "HS256",
+              expiresIn: expiresInMs / 1000,
+            }
           );
+          const expiryDate = new Date(Date.now() + expiresInMs);
           return {
             statusCode: 302,
             headers: {
               location: "/",
             },
             cookies: [
-              `auth-token=${token}; HttpOnly; SameSite=None; Secure; Path=/; Expires=${expires}`,
+              `auth-token=${token}; HttpOnly; SameSite=None; Secure; Path=/; Expires=${expiryDate}`,
             ],
           };
         },

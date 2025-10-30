@@ -1,8 +1,6 @@
 // Based off: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/example_cloudfront_functions_kvs_jwt_verify_section.html
 // Note that as a CloudFront Function, this code has limitations compared to a Lambda@Edge function.
 // For example, no external libraries can be used, and the runtime is more limited.
-
-
 import crypto from "crypto";
 import cf from "cloudfront";
 
@@ -15,14 +13,10 @@ const redirectResponse = {
 };
 
 const kvsKey = "__placeholder-for-jwt-secret-key__";
-// set to true to enable console logging
-const loggingEnabled = true;
+// Set to true to enable console logging
+const loggingEnabled = false;
 
 function jwtDecode(token: string, key: string, noVerify?: boolean) {
-  // check token
-  if (!token) {
-    throw new Error("No token supplied");
-  }
   // check segments
   const segments = token.split(".");
   if (segments.length !== 3) {
@@ -64,8 +58,7 @@ function jwtDecode(token: string, key: string, noVerify?: boolean) {
   return payload;
 }
 
-//Function to ensure a constant time comparison to prevent
-//timing side channels.
+// Function to ensure a constant time comparison to prevent timing side channels.
 function _constantTimeEquals(a: string, b: string) {
   if (a.length != b.length) {
     return false;
@@ -95,25 +88,17 @@ function _base64urlDecode(str: string) {
   return Buffer.from(str, "base64url").toString();
 }
 
-async function handler(event: AWSCloudFrontFunction.Event, context: AWSCloudFrontFunction.Context) {
-  console.log("🟢 Auth check event:", event);
-  console.log("🔵 Auth check context:", context);
+async function handler(event: AWSCloudFrontFunction.Event) {
   const request = event.request;
   const secret_key = await getSecret();
 
   if (!secret_key) {
-    return redirectResponse;
+    // It's not possible for us to validate requests without the secret key so we have no choice but to block all requests.
+    throw new Error("Error retrieving JWT secret key");
   }
 
-  // console.log(request);
-  // console.log(request.cookies);
-  // console.log(request.cookies["auth-token"]);
-  // console.log(Object.keys(request.cookies));
   const jwtToken = request.cookies["auth-token"] && request.cookies["auth-token"].value;
-  console.log("jwtToken:", jwtToken);
-  // console.log(Object.keys(request.cookies));
 
-  // If no JWT token, then generate HTTP redirect 401 response.
   if (!jwtToken) {
     log("Error: No JWT in the cookies");
     return redirectResponse;
@@ -125,8 +110,6 @@ async function handler(event: AWSCloudFrontFunction.Event, context: AWSCloudFron
     return redirectResponse;
   }
 
-  // //Remove the JWT from the query string if valid and return.
-  // delete request.querystring.jwt;
   log("Valid JWT token");
   return request;
 }
@@ -143,11 +126,21 @@ async function getSecret() {
 }
 
 const log: typeof console.log = function () {
-  if (loggingEnabled) {
-    // @ts-expect-error We can't use spread or rest parameters in CloudFront Functions
-    // eslint-disable-next-line prefer-spread, prefer-rest-params
-    console.log.apply(console, arguments);
+  if (!loggingEnabled) return;
+
+  // CloudFront Function runtime only prints first argument passed to console.log so add other args to the first one if given.
+  // eslint-disable-next-line prefer-rest-params -- We can't use spread or rest parameters in CloudFront Functions
+  let message = arguments[0]
+  if (arguments.length > 1) {
+    const otherArgs = [];
+    for (let i = 1; i < arguments.length; i++) {
+      // eslint-disable-next-line prefer-rest-params
+      otherArgs[i-1] = arguments[i];
+    }
+
+    message += " - additional args: " + JSON.stringify(otherArgs);
   }
+  console.log(message);
 }
 
 // This serves no purpose other than to make TypeScript and eslint happy by showing that that handler is used. We can't
