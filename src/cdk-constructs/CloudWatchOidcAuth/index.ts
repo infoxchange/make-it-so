@@ -4,12 +4,12 @@ import CloudFront from "aws-cdk-lib/aws-cloudfront";
 import CDK from "aws-cdk-lib";
 import CdkCustomResources from "aws-cdk-lib/custom-resources";
 import Lambda from "aws-cdk-lib/aws-lambda";
-import { getFileContentsWithoutTypes } from "../../lib/utils/source-code.js";
 import * as SST from "sst/constructs";
 import { Config as SSTInternalConfig } from "sst/config.js";
 import CloudFrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
 import { BaseSiteCdkDistributionProps } from "sst/constructs/BaseSite.js";
 import path from "node:path";
+import fs from "node:fs";
 
 type ConstructScope = ConstructorParameters<typeof Construct>[0];
 type ConstructId = ConstructorParameters<typeof Construct>[1];
@@ -198,9 +198,7 @@ export class CloudWatchOidcAuth extends Construct {
       `${this.id}EdgeFunctionAuthCheck`,
       {
         code: CloudFront.FunctionCode.fromInline(
-          getFileContentsWithoutTypes(
-            path.join(import.meta.dirname, "auth-check.ts"),
-          ).replace("__placeholder-for-jwt-secret-key__", key),
+          fs.readFileSync(path.join(import.meta.dirname, "auth-check.js"), "utf8").replace("__placeholder-for-jwt-secret-key__", key),
         ),
         runtime: CloudFront.FunctionRuntime.JS_2_0,
         keyValueStore: cfKeyValueStore,
