@@ -14,7 +14,7 @@ const redirectResponse = {
 
 const kvsKey = "__placeholder-for-jwt-secret-key__";
 // set to true to enable console logging
-const loggingEnabled = false;
+const loggingEnabled = true;
 
 function jwtDecode(token: string, key: string, noVerify?: boolean) {
   // check token
@@ -94,6 +94,7 @@ function _base64urlDecode(str: string) {
 }
 
 export const handler = ApiHandler(async (event) => {
+  console.log("Auth check event:", event);
   const request = event.request;
   const secret_key = await getSecret();
 
