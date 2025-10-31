@@ -1,5 +1,6 @@
 import { AuthHandler, OidcAdapter, Session } from "sst/node/auth";
 import { Issuer } from "openid-client";
+import { parseEnvironment } from "sst/node/util";
 
 const oidcClientId = process.env.OIDC_CLIENT_ID;
 if (!oidcClientId) {
@@ -26,7 +27,7 @@ declare module "sst/node/auth" {
   }
 }
 
-export const handler = AuthHandler({
+export const handler = (...args) => { console.log("----", process.env, "--", parseEnvironment()); return AuthHandler({
   providers: {
     oidc: OidcAdapter({
       issuer: await Issuer.discover(oidcIssuerConfigUrl.href),
@@ -43,4 +44,4 @@ export const handler = AuthHandler({
       },
     }),
   },
-});
+})(...args)};
