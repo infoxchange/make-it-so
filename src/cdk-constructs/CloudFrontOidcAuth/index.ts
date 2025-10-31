@@ -84,6 +84,7 @@ export class CloudFrontOidcAuth extends Construct {
     return updatedDistributionDefinition;
   }
 
+  // This deals with the infra required for checking if requests are authenticated and redirecting to the auth route if not
   private getFunctionAssociation(
     scope: ConstructScope,
     jwtSecret: SecretsManager.Secret,
@@ -210,6 +211,8 @@ export class CloudFrontOidcAuth extends Construct {
     };
   }
 
+  // This deals with the infra required for handling the OIDC authorisation process for requests that aren't yet
+  // authenticated but want to become authenticated.
   private getAuthBehaviorOptions(
     scope: ConstructScope,
     jwtSecret: SecretsManager.Secret,

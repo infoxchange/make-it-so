@@ -304,13 +304,36 @@ const auth = new CloudFrontOidcAuth(stack, "CloudFrontOidcAuth", {
 });
 
 // Then you apply it to the a CloudFront backed site when it's created
-const site = new IxStaticSite(stack, "IxStaticSite", {
+new IxStaticSite(stack, "IxStaticSite", {
   path: "path/to/site/files",
   cdk: {
     distribution: auth.addToDistributionDefinition(stack, {
       distributionDefinition: {},
     }),
   },
+});
+```
+
+<details>
+<summary><strong>ApiGatewayOidcAuth</strong> - Adds OIDC authentication to a API Gateway instance.</summary>
+
+This is an instance of SST v2's [Auth construct](https://v2.sst.dev/auth) that is preconfigured for OIDC.
+
+```typescript
+import { ApiGatewayOidcAuth } from "@infoxchange/make-it-so/cdk-constructs";
+
+// You first create an instance of ApiGatewayOidcAuth
+const auth = new ApiGatewayOidcAuth(stack, "ApiGatewayOidcAuth", {
+  oidcIssuerUrl: "https://your-oidc-server.com/path/",
+  oidcClientId: "your-client-id",
+  oidcScope: "email",
+});
+
+// Then you attach it to an API instance
+const api = new Api(stack, "api", {});
+auth.attach(stack, {
+  api,
+  prefix: "/auth", // optional
 });
 ```
 

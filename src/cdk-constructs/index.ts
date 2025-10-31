@@ -7,3 +7,4 @@ export * from "./IxElasticache.js";
 export * from "./IxApi.js";
 export * from "./IxQuicksightWorkspace.js";
 export * from "./CloudFrontOidcAuth/index.js";
+export * from "./ApiGatewayOidcAuth/index.js";
