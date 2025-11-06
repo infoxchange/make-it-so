@@ -294,7 +294,7 @@ const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 <summary><strong>CloudFrontOidcAuth</strong> - Adds OIDC authentication to a CloudFront distribution.</summary>
 
 ```typescript
-import { CloudWatchOidcAuth } from "@infoxchange/make-it-so/cdk-constructs";
+import { CloudFrontOidcAuth } from "@infoxchange/make-it-so/cdk-constructs";
 
 // You first create an instance of CloudFrontOidcAuth
 const auth = new CloudFrontOidcAuth(stack, "CloudFrontOidcAuth", {
