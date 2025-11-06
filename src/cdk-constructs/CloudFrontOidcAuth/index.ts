@@ -47,6 +47,7 @@ export class CloudFrontOidcAuth extends Construct {
       prefix = "/auth",
     }: { distributionDefinition: Mutable<DistributionProps>; prefix?: string },
   ) {
+    prefix = prefix.replace(/\/$/, ""); // Remove trailing slash from prefix if it has one
     const updatedDistributionDefinition = { ...distributionDefinition };
     const behaviourName = `${prefix.replace(/^\//g, "")}/*`;
     updatedDistributionDefinition.additionalBehaviors =
@@ -76,7 +77,7 @@ export class CloudFrontOidcAuth extends Construct {
       functionAssociations: [
         ...(updatedDistributionDefinition.defaultBehavior
           ?.functionAssociations || []),
-        this.getFunctionAssociation(scope, jwtSecret),
+        this.getFunctionAssociation(scope, jwtSecret, prefix),
       ],
     };
     updatedDistributionDefinition.additionalBehaviors[behaviourName] =
@@ -87,6 +88,7 @@ export class CloudFrontOidcAuth extends Construct {
   private getFunctionAssociation(
     scope: ConstructScope,
     jwtSecret: SecretsManager.Secret,
+    authRoutePrefix: string,
   ): CloudFront.FunctionAssociation {
     const cfKeyValueStore = new CloudFront.KeyValueStore(
       scope,
@@ -197,7 +199,8 @@ export class CloudFrontOidcAuth extends Construct {
               path.join(import.meta.dirname, "auth-check.js"),
               "utf8",
             )
-            .replace("__placeholder-for-jwt-secret-key__", key),
+            .replace("__placeholder-for-jwt-secret-key__", key)
+            .replace("__placeholder-for-auth-route-prefix__", authRoutePrefix),
         ),
         runtime: CloudFront.FunctionRuntime.JS_2_0,
         keyValueStore: cfKeyValueStore,
