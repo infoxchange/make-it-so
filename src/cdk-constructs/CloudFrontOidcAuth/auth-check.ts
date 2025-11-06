@@ -4,15 +4,17 @@
 import crypto from "crypto";
 import cf from "cloudfront";
 
+const kvsKey = "__placeholder-for-jwt-secret-key__";
+const authRoutePrefix = "__placeholder-for-auth-route-prefix__";
+
 //Response when JWT is not valid.
 const redirectResponse = {
   statusCode: 302,
   headers: {
-    location: { value: "/auth/oidc/authorize" },
+    location: { value: `${authRoutePrefix}/oidc/authorize` },
   },
 };
 
-const kvsKey = "__placeholder-for-jwt-secret-key__";
 // Set to true to enable console logging
 const loggingEnabled = false;
 
