@@ -177,9 +177,9 @@ export class SiteOidcAuth extends Construct {
     jwtSecret: SecretsManager.Secret,
     authRoutePrefix: string,
   ): string {
-    const sourceCode = fs
+    return fs
       .readFileSync(
-        path.join(import.meta.dirname, "auth-check-handler-body.ts"),
+        path.join(import.meta.dirname, "auth-check-handler-body.js"),
         "utf8",
       )
       .replace(
@@ -187,11 +187,6 @@ export class SiteOidcAuth extends Construct {
         jwtSecret.secretValue.toString(),
       )
       .replace("__placeholder-for-auth-route-prefix__", authRoutePrefix);
-
-    // Strip typescript types
-    return transformSync(sourceCode, {
-      loader: "ts",
-    }).code;
   }
 
   private convertToCloudFrontFunctionCompatibleCode(
