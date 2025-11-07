@@ -9,7 +9,7 @@ import { Config as SSTInternalConfig } from "sst/config.js";
 import CloudFrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
 import path from "node:path";
 import fs from "node:fs";
-import { transformSync } from "esbuild";
+import { TransformOptions, transformSync } from "esbuild";
 import type {
   ExtendedNextjsSiteProps,
   ExtendedStaticSiteProps,
@@ -118,7 +118,9 @@ export class SiteOidcAuth extends Construct {
       siteProps?.cdk?.transform?.(plan);
 
       plan.cloudFrontFunctions?.serverCfFunction.injections.push(
-        this.getAuthCheckHandlerBodyCode(jwtSecret, prefix),
+        this.convertToCloudFrontFunctionCompatibleCode(
+          this.getAuthCheckHandlerBodyCode(jwtSecret, prefix),
+        ),
       );
     };
 
@@ -161,6 +163,7 @@ export class SiteOidcAuth extends Construct {
               ${this.getAuthCheckHandlerBodyCode(jwtSecret, authRoutePrefix)}
               return request;
             }`,
+            { minify: true },
           ),
         ),
         // We could specify the JS v2.0 runtime here but for SSR sites SST does the function creation and that currently
@@ -197,6 +200,7 @@ export class SiteOidcAuth extends Construct {
 
   private convertToCloudFrontFunctionCompatibleCode(
     sourceCode: string,
+    esbuildOptions?: TransformOptions,
   ): string {
     // ESBuild doesn't currently support transforming const/let to var, which is required for CloudFront Functions
     // JS runtime 1.0.
@@ -205,8 +209,8 @@ export class SiteOidcAuth extends Construct {
       .replaceAll(/let /g, "var ");
     console.log("---- 3", sourceCode)
     return transformSync(sourceCode, {
-      minify: true,
       target: "es5",
+      ...esbuildOptions,
     }).code;
   }
 
@@ -255,6 +259,7 @@ export class SiteOidcAuth extends Construct {
               request.headers["x-forwarded-host"] = { value: request.headers.host.value };
               return request;
             }`,
+            { minify: true },
           ),
         ),
         runtime: CloudFront.FunctionRuntime.JS_2_0,
