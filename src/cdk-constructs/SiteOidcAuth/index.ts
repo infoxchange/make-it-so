@@ -189,9 +189,10 @@ export class SiteOidcAuth extends Construct {
         jwtSecret.secretValue.toString(),
       )
       .replace("__placeholder-for-auth-route-prefix__", authRoutePrefix)
-      // When typescript builds the make-it-so code including it may add an "export {}" at the end to make it a module.
-      // This will cause a syntax error in CloudFront Functions so remove it here.
-      .replace(/export {};\s*$/g, "");;
+      // When typescript builds the make-it-so code including "auth-check-handler-body.ts" it will add "export {}" to
+      // the end of the file if it's not already a module. This will cause a syntax error in CloudFront Functions so we
+      // remove it here.
+      .replace(/export {};\s*$/g, "");
   }
 
   private convertToCloudFrontFunctionCompatibleCode(

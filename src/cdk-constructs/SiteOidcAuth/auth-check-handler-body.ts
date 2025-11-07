@@ -116,7 +116,27 @@ function _sign(input: string, key: string, method: string) {
 }
 
 function _base64urlDecode(str: string) {
-  return Buffer.from(str, "base64url").toString();
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let output = '';
+
+  let bc = 0, bs = 0, buffer, i = 0;
+  for (; i < str.length; i++) {
+      buffer = chars.indexOf(str.charAt(i));
+      if (buffer === -1) continue;
+
+      bs = (bs << 6) | buffer;
+      bc += 6;
+
+      if (bc >= 8) {
+          bc -= 8;
+          output += String.fromCharCode((bs >> bc) & 0xFF);
+      }
+  }
+
+  return output;
 }
 
 const jwtToken =
