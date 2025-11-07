@@ -198,7 +198,10 @@ export class SiteOidcAuth extends Construct {
     // JS runtime 1.0.
     sourceCode = sourceCode
       .replaceAll(/const /g, "var ")
-      .replaceAll(/let /g, "var ");
+      .replaceAll(/let /g, "var ")
+      // When typescript builds the make-it-so code including it may add an "export {}" at the end to make it a module.
+      // This will cause a syntax error in CloudFront Functions so remove it here.
+      .replace(/export {};\s*$/g, "");
     console.log("---- 3", sourceCode)
     return transformSync(sourceCode, {
       minify: true,
