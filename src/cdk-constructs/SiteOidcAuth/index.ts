@@ -149,6 +149,7 @@ export class SiteOidcAuth extends Construct {
     jwtSecret: SecretsManager.Secret,
     authRoutePrefix: string,
   ): CloudFront.FunctionAssociation {
+    console.log("---- 1")
     const authCheckFunction = new CloudFront.Function(
       scope,
       `${this.id}AuthCheckFunction`,
@@ -166,6 +167,7 @@ export class SiteOidcAuth extends Construct {
         // uses JS v1.0 so no point using v2.0 here as the code has to be compatible with v1.0 anyway.
       },
     );
+    console.log("---- 2")
 
     return {
       function: authCheckFunction,
@@ -197,6 +199,7 @@ export class SiteOidcAuth extends Construct {
     sourceCode = sourceCode
       .replaceAll(/const /g, "var ")
       .replaceAll(/let /g, "var ");
+    console.log("---- 3", sourceCode)
     return transformSync(sourceCode, {
       minify: true,
       target: "es5",
