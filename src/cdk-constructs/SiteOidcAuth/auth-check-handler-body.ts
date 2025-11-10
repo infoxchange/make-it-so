@@ -15,6 +15,7 @@ const authRoutePrefix = "__placeholder-for-auth-route-prefix__";
 // Set to true to enable console logging
 const loggingEnabled = false;
 
+// Simple logger that can be enabled/disabled via the loggingEnabled variable.
 const log: typeof console.log = function () {
   if (!loggingEnabled) return;
 
@@ -41,6 +42,7 @@ const redirectResponse = {
   },
 };
 
+// Takes a JWT token to decode and throws an error if invalid
 function jwtDecode(token: string, key: string, noVerify?: boolean) {
   // check segments
   const segments = token.split(".");
@@ -97,6 +99,7 @@ function _constantTimeEquals(a: string, b: string) {
   return 0 === xor;
 }
 
+// Verifies some input matches an expected signature.
 function _verify(
   input: string,
   key: string,
@@ -111,10 +114,13 @@ function _verify(
   }
 }
 
+// Signs some input with a key and method.
 function _sign(input: string, key: string, method: string) {
   return crypto.createHmac(method, key).update(input).digest("base64url");
 }
 
+// Very annoying that we have to implement this ourselves but it seems like the v1 runtime does not have atob/btoa or
+// Buffer available.
 function _base64urlDecode(str: string) {
   str = str.replace(/-/g, "+").replace(/_/g, "/");
   while (str.length % 4) str += "=";
