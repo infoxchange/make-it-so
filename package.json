@@ -16,7 +16,8 @@
   "license": "MIT",
   "exports": {
     "./cdk-constructs": "./dist/cdk-constructs/index.js",
-    "./deployConfig": "./dist/deployConfig.js"
+    "./deployConfig": "./dist/deployConfig.js",
+    "./auth": "./dist/lib/auth/index.js"
   },
   "lint-staged": {
     "**/*": [

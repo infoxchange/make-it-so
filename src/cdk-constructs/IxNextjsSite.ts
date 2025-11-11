@@ -16,6 +16,7 @@ import {
   setupDefaultEnvVars,
   applyConditionalEnvironmentVariables,
   parentCompatibleSsrProps,
+  processAuthProps,
 } from "../lib/site/support.js";
 
 type ConstructScope = ConstructorParameters<typeof NextjsSite>[0];
@@ -34,6 +35,7 @@ export class IxNextjsSite extends NextjsSite {
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
     }
+    props = processAuthProps(scope, id, "SsrSite", props);
     props = setupDefaultEnvVars(scope, id, props);
     props = applyConditionalEnvironmentVariables(scope, id, props);
 

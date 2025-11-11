@@ -89,6 +89,12 @@ Unlike [NextjsSite](https://v2.sst.dev/constructs/NextjsSite), any environment v
 | customDomain.isIxManagedDomain       | boolean                                                          | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them                                                                                                                        |
 | customDomain.additionalDomainAliases | string[]                                                         | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                                                                                                                                       |
 | environment                          | Record<string, string \| {buildtime?: string, runtime?: string}> | (optional) As well as accepting strings for environment variable values as is already done by [NextjsSite](https://v2.sst.dev/constructs/NextjsSite) it also accepts an object with the properties `buildtime` and/or `runtime` which allows you to customise the environment variable value during those different steps. |
+| auth                                 | object                                                           | (optional) If provided will put the site behind auth.                                                                                                                                                                                                                                                                      |
+| auth.oidc                            | object                                                           |                                                                                                                                                                                                                                                                                                                            |
+| auth.oidc.issuerUrl                  | string                                                           | An issuer URL for the OIDC server to use.                                                                                                                                                                                                                                                                                  |
+| auth.oidc.clientId                   | string                                                           | The OIDC client ID to use.                                                                                                                                                                                                                                                                                                 |
+| auth.oidc.scope                      | string                                                           | The scope used for the auth request.                                                                                                                                                                                                                                                                                       |
+| auth.prefix                          | string                                                           | (optional) A custom path to be used for the auth route.                                                                                                                                                                                                                                                                    |
 
 ```typescript
 import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
@@ -123,9 +129,15 @@ Also if `isIxManagedDomain` is true DNS records will be automatically created fo
 
 | Prop                                 | Type     | Description                                                                                                                                                                                         |
 | ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [...NextjsSiteProps]                 |          | Any props accepted by [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite)                                                                                                                  |
+| [...StaticSiteProps]                 |          | Any props accepted by [SST's StaticSite](https://v2.sst.dev/constructs/StaticSite)                                                                                                                  |
 | customDomain.isIxManagedDomain       | boolean  | (optional) If true will attempt to create DNS records and certs for it using the IX shared infra. Only required if explicitly setting customDomains and you want DNS records + certs setup for them |
 | customDomain.additionalDomainAliases | string[] | (optional) Works like `customDomain.domainAlias` but `domainAlias` only allows one domain, additionalDomainAliases allows setting additional domains                                                |
+| auth                                 | object   | (optional) If provided will put the site behind auth.                                                                                                                                               |
+| auth.oidc                            | object   |                                                                                                                                                                                                     |
+| auth.oidc.issuerUrl                  | string   | An issuer URL for the OIDC server to use.                                                                                                                                                           |
+| auth.oidc.clientId                   | string   | The OIDC client ID to use.                                                                                                                                                                          |
+| auth.oidc.scope                      | string   | The scope used for the auth request.                                                                                                                                                                |
+| auth.prefix                          | string   | (optional) A custom path to be used for the auth route.                                                                                                                                             |
 
 ```typescript
 import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
@@ -290,31 +302,7 @@ const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 
 </details>
 
-<details>
-<summary><strong>CloudFrontOidcAuth</strong> - Adds OIDC authentication to a CloudFront distribution.</summary>
-
-```typescript
-import { CloudWatchOidcAuth } from "@infoxchange/make-it-so/cdk-constructs";
-
-// You first create an instance of CloudFrontOidcAuth
-const auth = new CloudFrontOidcAuth(stack, "CloudFrontOidcAuth", {
-  oidcIssuerUrl: "https://your-oidc-server.com/path/",
-  oidcClientId: "your-client-id",
-  oidcScope: "email",
-});
-
-// Then you apply it to the a CloudFront backed site when it's created
-const site = new IxStaticSite(stack, "IxStaticSite", {
-  path: "path/to/site/files",
-  cdk: {
-    distribution: auth.addToDistributionDefinition(stack, {
-      distributionDefinition: {},
-    }),
-  },
-});
-```
-
-## Full Example
+## Example App Using Make It So
 
 To deploy a Next.js based site you would include a `sst.config.ts` file at the root of repo with contents like this:
 
@@ -348,9 +336,7 @@ export default {
 } satisfies SSTConfig;
 ```
 
-Then simply configure the IX pipeline to deploy that repo as a serverless app.
-
-important that sst and aws lib version match those used in ix-deploy-support
+Then simply configure the IX pipeline to deploy that repo as a serverless app. Note it is important that any AWS CDK libraries included in package.json match version match the version used by SST.
 
 # The Name
 

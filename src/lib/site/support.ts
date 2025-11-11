@@ -15,6 +15,21 @@ import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { convertToBase62Hash } from "../utils/hash.js";
 import { type DistributionDomainProps } from "sst/constructs/Distribution.js";
 import type { Plan as SSTPlan } from "sst/constructs/SsrSite.js";
+import {
+  SiteOidcAuth,
+  type AddToSiteProps as SiteOidcAuthAddToSiteProps,
+} from "../../cdk-constructs/SiteOidcAuth/index.js";
+
+type SharedExtendedSiteProps = {
+  customDomain?: string | ExtendedCustomDomains;
+  auth?: {
+    oidc: {
+      issuerUrl: string;
+      clientId: string;
+      scope: string;
+    };
+  } & SiteOidcAuthAddToSiteProps;
+};
 
 export type ExtendedCustomDomains = DistributionDomainProps & {
   isIxManagedDomain?: boolean;
@@ -23,36 +38,35 @@ export type ExtendedCustomDomains = DistributionDomainProps & {
 export type ExtendedNextjsSiteProps = Omit<
   NextjsSiteProps,
   "customDomain" | "environment"
-> & {
-  customDomain?: string | ExtendedCustomDomains;
-  /**
-   * An object with the key being the environment variable name. The value can either be the environment variable value
-   * as a string or as an object with `buildtime` and/or `runtime` properties where the values of `buildtime` and
-   * `runtime` is the environment variable value that will be used during that step.
-   *
-   * @example
-   * ```js
-   * environment: {
-   *   USER_POOL_CLIENT: auth.cognitoUserPoolClient.userPoolClientId,
-   *   NODE_OPTIONS: {
-   *     buildtime: "--max-old-space-size=4096",
-   *   },
-   *   API_URL: {
-   *     buildtime: "https://external.domain",
-   *     runtime: "https://internal.domain",
-   *   },
-   * },
-   * ```
-   */
-  environment?: Record<
-    string,
-    string | { buildtime?: string; runtime?: string }
-  >;
-};
+> &
+  SharedExtendedSiteProps & {
+    /**
+     * An object with the key being the environment variable name. The value can either be the environment variable value
+     * as a string or as an object with `buildtime` and/or `runtime` properties where the values of `buildtime` and
+     * `runtime` is the environment variable value that will be used during that step.
+     *
+     * @example
+     * ```js
+     * environment: {
+     *   USER_POOL_CLIENT: auth.cognitoUserPoolClient.userPoolClientId,
+     *   NODE_OPTIONS: {
+     *     buildtime: "--max-old-space-size=4096",
+     *   },
+     *   API_URL: {
+     *     buildtime: "https://external.domain",
+     *     runtime: "https://internal.domain",
+     *   },
+     * },
+     * ```
+     */
+    environment?: Record<
+      string,
+      string | { buildtime?: string; runtime?: string }
+    >;
+  };
 
-export type ExtendedStaticSiteProps = Omit<StaticSiteProps, "customDomain"> & {
-  customDomain?: string | ExtendedCustomDomains;
-};
+export type ExtendedStaticSiteProps = Omit<StaticSiteProps, "customDomain"> &
+  SharedExtendedSiteProps;
 
 export function setupCustomDomain<
   Props extends ExtendedStaticSiteProps | ExtendedNextjsSiteProps,
@@ -385,4 +399,41 @@ export function getAlternativeDomains<
     return props.customDomain.alternateNames ?? [];
   }
   return [];
+}
+
+export function processAuthProps<
+  SiteType extends "StaticSite" | "SsrSite",
+  Props extends SiteType extends "StaticSite"
+    ? ExtendedStaticSiteProps
+    : ExtendedNextjsSiteProps,
+>(
+  scope: Construct,
+  id: string,
+  siteType: SiteType,
+  props: Readonly<Props>,
+): Props {
+  if (!props.auth) return props;
+  const { oidc, ...otherAuthProps } = props.auth;
+  const auth = new SiteOidcAuth(scope, `${id}-SiteOidcAuth`, {
+    oidcIssuerUrl: oidc.issuerUrl,
+    oidcClientId: oidc.clientId,
+    oidcScope: oidc.scope,
+  });
+  if (siteType === "StaticSite") {
+    return auth.addToStaticSiteProps(
+      scope,
+      props as ExtendedStaticSiteProps,
+      otherAuthProps,
+    ) as Props;
+  } else if (siteType === "SsrSite") {
+    return auth.addToSsrSiteProps(
+      scope,
+      props as ExtendedNextjsSiteProps,
+      otherAuthProps,
+    ) as Props;
+  }
+  siteType satisfies never;
+  throw new Error(
+    `Unsupported site type ${siteType} when processing auth prop.`,
+  );
 }

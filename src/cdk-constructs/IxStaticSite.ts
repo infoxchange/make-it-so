@@ -8,6 +8,7 @@ import {
   getPrimaryCustomDomain,
   getPrimaryDomain,
   getPrimaryOrigin,
+  processAuthProps,
   setupCertificate,
   setupCustomDomain,
   setupDnsRecords,
@@ -32,6 +33,7 @@ export class IxStaticSite extends StaticSite {
       props = setupCertificate(scope, id, props);
       props = setupDomainAliasRedirect(scope, id, props);
     }
+    props = processAuthProps(scope, id, "StaticSite", props);
 
     super(scope, id, props);
     this.propsExtended = props;
