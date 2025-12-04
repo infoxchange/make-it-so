@@ -36,12 +36,16 @@ export async function verifyAccessToken<SafeVerify extends boolean = false>({
     if (!jwksUri) {
       throw new Error("JWKS URI not found in issuer metadata");
     }
+    console.debug("Discovered JWKS URI:", jwksUri);
     const JWKS = createRemoteJWKSet(new URL(jwksUri));
+    console.debug("Discovered JWKS URI 1");
 
     // Verify the signature and basic claims
     const { payload } = await jwtVerify(token, JWKS, {
       issuer: issuer.metadata.issuer,
     });
+
+    console.debug("Discovered JWKS URI 2");
 
     const tokenAud = payload.aud ?? payload.client_id;
     let audienceMatches = false;
