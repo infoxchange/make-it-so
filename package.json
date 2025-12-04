@@ -17,7 +17,8 @@
   "exports": {
     "./cdk-constructs": "./dist/cdk-constructs/index.js",
     "./deployConfig": "./dist/deployConfig.js",
-    "./auth": "./dist/lib/auth/index.js"
+    "./auth": "./dist/lib/auth/index.js",
+    "./proxy": "./dist/lib/proxy/index.js"
   },
   "lint-staged": {
     "**/*": [
@@ -54,6 +55,7 @@
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
+    "undici": "^7.16.0",
     "zod": "^3.24.2"
   }
 }
