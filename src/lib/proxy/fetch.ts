@@ -23,6 +23,7 @@ export function setupProxyGlobally() {
 
 export function getProxiedFetch() {
   const fetch: typeof undiciFetch = (input, init = {}) => {
+    console.log("Using proxied fetch for request to:", input);
     if (init.dispatcher) {
       console.warn(
         "A custom dispatcher was provided to fetch but this is ignored as a proxy agent is being used.",

@@ -31,7 +31,9 @@ export async function verifyAccessToken<SafeVerify extends boolean = false>({
     : JWTPayload
 > {
   try {
+    console.debug("Discovered JWKS URI aa:", issuerUrl);
     const issuer = await Issuer.discover(issuerUrl);
+    console.debug("Discovered JWKS URI aa 2");
     const jwksUri = issuer.metadata.jwks_uri;
     if (!jwksUri) {
       throw new Error("JWKS URI not found in issuer metadata");
