@@ -262,6 +262,28 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 </details>
 
 <details>
+<summary><strong>IxSESIdentity</strong> - Creates an SES domain identity for a domain managed by IX.</summary>
+
+```typescript
+import { IxSESIdentity } from "@infoxchange/make-it-so/cdk-constructs";
+
+new IxSESIdentity(scope, "IxSESIdentity", {
+  domain: "example.dev.ixapps.org",
+  mailFromSubdomain: "info",
+});
+```
+
+#### Options:
+
+| Prop              | Type   | Description                                                                                                                                                                           |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| domain            | string | The domain of the identity. Either this for `from` must be specified.                                                                                                                 |
+| from              | string | An email address from get domain of the identity. Either this for `domain` must be specified.                                                                                         |
+| mailFromSubdomain | string | (optional) by default the custom mail from domain will be `mail.${domain}`. This lets you change that. It should be given as just the subdomain part, not the fully qualified domain. |
+
+</details>
+
+<details>
 <summary><strong>IxWebsiteRedirect</strong> - Creates a redirect from one domain to another.</summary>
 
 ```typescript
