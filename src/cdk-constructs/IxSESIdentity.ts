@@ -7,19 +7,15 @@ type ConstructScope = ConstructorParameters<typeof Construct>[0];
 type ConstructId = ConstructorParameters<typeof Construct>[1];
 
 type Props = {
+  domain: string;
   mailFromSubdomain?: string;
-} & (
-  | {
-      domain: string;
-    }
-  | {
-      from: string;
-    }
-);
+};
 
 export class IxSESIdentity extends Construct {
   constructor(scope: ConstructScope, id: ConstructId, props: Props) {
-    const domain = "domain" in props ? props.domain : props.from.split("@")[1];
+    const domain = props.domain.includes("@")
+      ? props.domain.split("@")[1]
+      : props.domain;
     const mailFromDomain = `${props.mailFromSubdomain ?? "mail"}.${domain}`;
 
     super(scope, id);
