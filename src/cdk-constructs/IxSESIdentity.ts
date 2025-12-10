@@ -28,7 +28,7 @@ export class IxSESIdentity extends Construct {
 
     super(scope, id);
 
-    const identity = new ses.EmailIdentity(scope, "EmailIdentity", {
+    const identity = new ses.EmailIdentity(scope, `${id}EmailIdentity`, {
       identity: ses.Identity.domain(domain),
       mailFromDomain,
     });
