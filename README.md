@@ -268,18 +268,26 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 import { IxSESIdentity } from "@infoxchange/make-it-so/cdk-constructs";
 
 new IxSESIdentity(scope, "IxSESIdentity", {
+  // Email identity domain will be: example.dev.ixapps.org
+  // Custom mail from domain will be: info.example.dev.ixapps.org
   domain: "example.dev.ixapps.org",
   mailFromSubdomain: "info",
+});
+// or
+new IxSESIdentity(scope, "IxSESIdentity", {
+  // Email identity domain will be: example.dev.ixapps.org
+  // Custom mail from domain will be: info.example.dev.ixapps.org
+  from: "anything@info.example.dev.ixapps.org",
 });
 ```
 
 #### Options:
 
-| Prop              | Type   | Description                                                                                                                                                                           |
-| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| domain            | string | The domain of the identity. Either this for `from` must be specified.                                                                                                                 |
-| from              | string | An email address from get domain of the identity. Either this for `domain` must be specified.                                                                                         |
-| mailFromSubdomain | string | (optional) by default the custom mail from domain will be `mail.${domain}`. This lets you change that. It should be given as just the subdomain part, not the fully qualified domain. |
+| Prop              | Type   | Description                                                                                                                                                                                                                                                                               |
+| ----------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| domain            | string | The domain of the identity. Either this for `from` must be specified.                                                                                                                                                                                                                     |
+| mailFromSubdomain | string | (optional) by default the custom mail from domain will be `mail.${domain}`. This lets you change that. It should be given as just the subdomain part, not the fully qualified domain. It's not used if from is given since the mail from domain is extracted from the from email address. |
+| from              | string | An email address from get domain of the identity. Either this for `domain` must be specified.                                                                                                                                                                                             |
 
 </details>
 
