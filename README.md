@@ -268,8 +268,10 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 import { IxSESIdentity } from "@infoxchange/make-it-so/cdk-constructs";
 
 new IxSESIdentity(scope, "IxSESIdentity", {
+  // Email identity domain will be: example.dev.ixapps.org
+  // Custom mail from domain will be: info.example.dev.ixapps.org
   domain: "example.dev.ixapps.org",
-  mailFromSubdomain: "info",
+  mailFromSubdomain: "info", // optional, "mail" will be used otherwise
 });
 ```
 
@@ -277,8 +279,7 @@ new IxSESIdentity(scope, "IxSESIdentity", {
 
 | Prop              | Type   | Description                                                                                                                                                                           |
 | ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| domain            | string | The domain of the identity. Either this for `from` must be specified.                                                                                                                 |
-| from              | string | An email address from get domain of the identity. Either this for `domain` must be specified.                                                                                         |
+| domain            | string | The domain of the identity. An email address can also be provided in which case the domain will be extracted from the email.                                                          |
 | mailFromSubdomain | string | (optional) by default the custom mail from domain will be `mail.${domain}`. This lets you change that. It should be given as just the subdomain part, not the fully qualified domain. |
 
 </details>
