@@ -6,25 +6,21 @@ import * as cdk from "aws-cdk-lib";
 type ConstructScope = ConstructorParameters<typeof Construct>[0];
 type ConstructId = ConstructorParameters<typeof Construct>[1];
 
-type Props =
+type Props = {
+  mailFromSubdomain?: string;
+} & (
   | {
       domain: string;
-      mailFromSubdomain?: string;
     }
   | {
       from: string;
-    };
+    }
+);
 
 export class IxSESIdentity extends Construct {
   constructor(scope: ConstructScope, id: ConstructId, props: Props) {
-    const mailFromDomain =
-      "from" in props
-        ? props.from.split("@")[1]
-        : `${props.mailFromSubdomain ?? "mail"}.${props.domain}`;
-    const domain =
-      "from" in props
-        ? mailFromDomain.split(".").slice(1).join(".")
-        : props.domain;
+    const domain = "domain" in props ? props.domain : props.from.split("@")[1];
+    const mailFromDomain = `${props.mailFromSubdomain ?? "mail"}.${domain}`;
 
     super(scope, id);
 
