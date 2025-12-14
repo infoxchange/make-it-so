@@ -17,7 +17,8 @@
   "exports": {
     "./cdk-constructs": "./dist/cdk-constructs/index.js",
     "./deployConfig": "./dist/deployConfig.js",
-    "./auth": "./dist/lib/auth/index.js"
+    "./auth": "./dist/lib/auth/index.js",
+    "./proxy": "./dist/lib/proxy/index.js"
   },
   "lint-staged": {
     "**/*": [
@@ -32,6 +33,7 @@
     "@eslint/js": "^9.3.0",
     "@tsconfig/node21": "^21.0.3",
     "@types/aws-cloudfront-function": "^1.0.6",
+    "@types/global-agent": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "aws-cdk-lib": "2.142.1",
     "constructs": "^10.3.0",
@@ -53,7 +55,9 @@
     "sst": "^2.0.0"
   },
   "dependencies": {
+    "global-agent": "^3.0.0",
     "jsonwebtoken": "^9.0.2",
+    "undici": "^7.16.0",
     "zod": "^3.24.2"
   }
 }
