@@ -302,6 +302,31 @@ const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 
 </details>
 
+### Configuring Clients To Use the HTTP Proxy
+
+It's not always foolproof due to the lack of standardisation around how http proxy support can be configured at a global
+level but importing the following should hopefully means that any http requests are sent via the proxy:
+
+```typescript
+import "@infoxchange/make-it-so/proxy/setup-globally";
+```
+
+Or if you don't want/need proxy details to be configured before other imports you can use:
+
+```typescript
+import { setupProxyGlobally } from "@infoxchange/make-it-so/proxy";
+
+setupProxyGlobally();
+```
+
+You can also get local fetch instance that's configured to use the proxy:
+
+```typescript
+import { getProxiedFetch } from "@infoxchange/make-it-so/proxy";
+
+const httpProxiedFetch = getProxiedFetch();
+```
+
 ## Example App Using Make It So
 
 To deploy a Next.js based site you would include a `sst.config.ts` file at the root of repo with contents like this:

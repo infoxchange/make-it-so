@@ -18,7 +18,8 @@
     "./cdk-constructs": "./dist/cdk-constructs/index.js",
     "./deployConfig": "./dist/deployConfig.js",
     "./auth": "./dist/lib/auth/index.js",
-    "./proxy": "./dist/lib/proxy/index.js"
+    "./proxy": "./dist/lib/proxy/index.js",
+    "./proxy/setup-globally": "./dist/lib/proxy/request-client-global-setup-on-import.js"
   },
   "lint-staged": {
     "**/*": [
