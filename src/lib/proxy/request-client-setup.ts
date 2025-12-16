@@ -10,7 +10,7 @@ export function setupProxyGlobally() {
   // Make operation idempotent
   if (getGlobalDispatcher() instanceof EnvHttpProxyAgent) return;
 
-  if (!process.env.HTTP_PROXY || !process.env.HTTPS_PROXY) return;
+  if (!process.env.HTTP_PROXY && !process.env.HTTPS_PROXY) return;
 
   // To cover libraries that use fetch
   // See https://nodejs.org/api/globals.html#custom-dispatcher
