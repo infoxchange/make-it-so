@@ -28,10 +28,21 @@ export class IxVpcDetails extends Construct {
   }
 
   static getVpcSubnetIds(scope: ConstructScope): Array<string> {
+    const { workloadGroup, appName } = ixDeployConfig;
+    let suffix = "";
+    if (workloadGroup === "ds") {
+      const possibleSuffixes = ["", "-2"];
+      // Randomly select a suffix to spread workload's IP usage across both sets of subnets. Use the app name as a seed
+      // to ensure consistent selection on redeploys.
+      const hash = appName
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      suffix = possibleSuffixes[hash % possibleSuffixes.length];
+    }
     return [1, 2, 3].map((subnetNum) =>
       StringParameter.valueForStringParameter(
         scope,
-        `/vpc/subnet/private-${ixDeployConfig.workloadGroup}/${subnetNum}/id`,
+        `/vpc/subnet/private-${workloadGroup}${suffix}/${subnetNum}/id`,
       ),
     );
   }
