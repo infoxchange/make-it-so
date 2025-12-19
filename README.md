@@ -250,14 +250,38 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 
 #### Options:
 
-| Prop         | Type                                       | Description                                                                                                                                                                                                                     |
-| ------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | "A" \| "CNAME" \| "NS" \| "SOA" \| "ALIAS" | DNS record type                                                                                                                                                                                                                 |
-| name         | string                                     | DNS record FQDN                                                                                                                                                                                                                 |
-| value        | string                                     | DNS record value                                                                                                                                                                                                                |
-| ttl          | number                                     | (optional) TTL value for DNS record                                                                                                                                                                                             |
-| hostedZoneId | string                                     | (optional) The ID of the Route53 HostedZone belonging to the dns-hosting account in which to create the DNS record. If not given the correct HostedZone will be inferred from the domain in the "value" prop.                   |
-| aliasZoneId  | string                                     | (only needed if type = "Alias") the Route53 HostedZone that the target of the alias record lives in. Generally this will be the well known ID of a HostedZone for a AWS service itself that is managed by AWS, not an end-user. |
+| Prop         | Type                                                        | Description                                                                                                                                                                                                                     |
+| ------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | "A" \| "CNAME" \| "NS" \| "SOA" \| "ALIAS" \| "TXT" \| "MX" | DNS record type                                                                                                                                                                                                                 |
+| name         | string                                                      | DNS record FQDN                                                                                                                                                                                                                 |
+| value        | string                                                      | DNS record value                                                                                                                                                                                                                |
+| ttl          | number                                                      | (optional) TTL value for DNS record                                                                                                                                                                                             |
+| hostedZoneId | string                                                      | (optional) The ID of the Route53 HostedZone belonging to the dns-hosting account in which to create the DNS record. If not given the correct HostedZone will be inferred from the domain in the "value" prop.                   |
+| aliasZoneId  | string                                                      | (only needed if type = "Alias") the Route53 HostedZone that the target of the alias record lives in. Generally this will be the well known ID of a HostedZone for a AWS service itself that is managed by AWS, not an end-user. |
+| priority     | number                                                      | (only needed if type = "MX") The priority level of the MX record.                                                                                                                                                               |
+
+</details>
+
+<details>
+<summary><strong>IxSESIdentity</strong> - Creates an SES domain identity for a domain managed by IX.</summary>
+
+```typescript
+import { IxSESIdentity } from "@infoxchange/make-it-so/cdk-constructs";
+
+new IxSESIdentity(scope, "IxSESIdentity", {
+  // Email identity domain will be: example.dev.ixapps.org
+  // Custom mail from domain will be: info.example.dev.ixapps.org
+  domain: "example.dev.ixapps.org",
+  mailFromSubdomain: "info", // optional, "mail" will be used otherwise
+});
+```
+
+#### Options:
+
+| Prop              | Type   | Description                                                                                                                                                                           |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| domain            | string | The domain of the identity. An email address can also be provided in which case the domain will be extracted from the email.                                                          |
+| mailFromSubdomain | string | (optional) by default the custom mail from domain will be `mail.${domain}`. This lets you change that. It should be given as just the subdomain part, not the fully qualified domain. |
 
 </details>
 

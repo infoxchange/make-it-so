@@ -13,11 +13,15 @@ type Props = {
   hostedZoneId?: string;
 } & (
   | {
-      type: "A" | "CNAME" | "NS" | "SOA";
+      type: "A" | "CNAME" | "NS" | "SOA" | "TXT";
     }
   | {
       type: "ALIAS";
       aliasZoneId: string;
+    }
+  | {
+      type: "MX";
+      priority: number;
     }
 );
 
@@ -36,15 +40,35 @@ export class IxDnsRecord extends Construct {
       scope,
       "/shared-services/route53/lambdaArn",
     );
-
-    const lambdaProps = remapKeys(constructProps, {
+    const keysMap = {
       name: "RecordFQDN",
       value: "RecordValue",
       ttl: "RecordTTL",
       hostedZoneId: "HostedZoneId",
       type: "RecordType",
       aliasZoneId: "AliasZoneId",
-    });
+    };
+    let lambdaProps;
+    if (constructProps.type === "TXT") {
+      lambdaProps = remapKeys(
+        {
+          ...constructProps,
+          value: `"${constructProps.value}"`,
+        },
+        keysMap,
+      );
+    } else if (constructProps.type === "MX") {
+      const { priority, ...rest } = constructProps;
+      lambdaProps = remapKeys(
+        {
+          ...rest,
+          value: `${priority} ${rest.value}`,
+        },
+        keysMap,
+      );
+    } else {
+      lambdaProps = remapKeys(constructProps, keysMap);
+    }
 
     new CustomResource(scope, id + "-CertificateCustomResource", {
       resourceType: "Custom::DNSRecordUpdaterLambda",
