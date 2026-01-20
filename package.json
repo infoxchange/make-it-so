@@ -12,7 +12,7 @@
     "prepare": "husky",
     "test": "vitest",
     "//fix-signature-issue-with-pulumiverse-vercel": "The sed command below patches the version of @pulumiverse/vercel in the sst3 platform package to a version that has the fix for the Pulumi signature issue.",
-    "postinstall": "cd node_modules/sst3/platform && sed -i.bak 's/\"@pulumiverse\\/vercel\": \"1.11.0\"/\"@pulumiverse\\/vercel\": \"1.14.2\"/' package.json && npm install"
+    "postinstall": "cd node_modules/sst3/platform && sed -i.bak 's/\"@pulumiverse\\/vercel\": \"1.11.0\"/\"@pulumiverse\\/vercel\": \"1.14.2\"/' package.json && touch .npmignore && npm install"
   },
   "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
   "license": "MIT",
