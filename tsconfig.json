@@ -2,7 +2,15 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist"
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "bundler",
+    "module": "es2022",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "extends": "@tsconfig/node21/tsconfig.json"

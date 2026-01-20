@@ -5,20 +5,19 @@
   "repository": "github:infoxchange/make-it-so",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest",
+    "build": "tsx build.ts",
+    "commit": "lint-staged && commit",
     "lint": "eslint . --fix && prettier . --write && tsc --noEmit",
     "lint:check": "eslint . && prettier . --check && tsc --noEmit",
     "prepare": "husky",
-    "commit": "lint-staged && commit"
+    "test": "vitest",
+    "postinstall": "cd node_modules/sst3/platform && npm install"
   },
   "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
   "license": "MIT",
   "exports": {
-    "./cdk-constructs": "./dist/cdk-constructs/index.js",
-    "./deployConfig": "./dist/deployConfig.js",
-    "./auth": "./dist/lib/auth/index.js",
-    "./proxy": "./dist/lib/proxy/index.js"
+    ".": "./dist/index.js",
+    "./components/ix": "./dist/components/ix/index.js"
   },
   "lint-staged": {
     "**/*": [
@@ -33,10 +32,10 @@
     "@eslint/js": "^9.3.0",
     "@tsconfig/node21": "^21.0.3",
     "@types/aws-cloudfront-function": "^1.0.6",
+    "@types/aws-lambda": "8.10.159",
     "@types/global-agent": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "aws-cdk-lib": "2.142.1",
-    "constructs": "^10.3.0",
+    "esbuild": "^0.27.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.3.0",
@@ -44,15 +43,15 @@
     "lint-staged": "^15.2.5",
     "prettier": "3.2.5",
     "semantic-release": "^23.1.1",
-    "sst": "2.42.0",
+    "sst3": "github:anomalyco/sst",
+    "tsx": "^4.7.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.11.0",
     "vitest": "^1.6.0"
   },
   "peerDependencies": {
-    "aws-cdk-lib": "^2.0.0",
-    "constructs": "^10.0.0",
-    "sst": "^2.0.0 || ^3.0.0"
+    "@pulumi/aws": "^7.16.0",
+    "@pulumi/pulumi": "^3.216.0"
   },
   "dependencies": {
     "global-agent": "^3.0.0",
