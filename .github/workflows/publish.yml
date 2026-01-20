@@ -69,7 +69,7 @@ jobs:
           if [[ ! "$VERSION" == 0.0.0* ]]; then
             prefix_message="Published new version:"
             echo -e "### :rocket: $prefix_message \n\`\`\`\n$VERSION\n\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo -e "$prefix_message \e[1m$VERSION\e[0m"
+            echo -e "$prefix_message\n\e[1m$VERSION\e[0m"
           else
             message="No publishable changes made since last version"
             echo "### $message" >> $GITHUB_STEP_SUMMARY
