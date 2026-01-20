@@ -42,6 +42,6 @@ await esbuild.build({
 });
 
 // Build declaration files
-execSync("tsc", { stdio: "inherit" });
+execSync("tsc --project tsconfig.build.json", { stdio: "inherit" });
 
 console.log("Build complete!");

@@ -30,7 +30,8 @@ describe("dns", () => {
 
   it("should create DNS adapter with transform function", async () => {
     const { dns } = await import("../src/components/ix/dns.js");
-    const transformFn = (args: { ttl?: number }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transformFn = (args: any) => {
       args.ttl = 300;
       return args;
     };

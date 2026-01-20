@@ -11,7 +11,8 @@
     "lint:check": "eslint . && prettier . --check && tsc --noEmit --emitDeclarationOnly false",
     "prepare": "husky",
     "test": "vitest",
-    "postinstall": "cd node_modules/sst3/platform && npm install"
+    "//fix-signature-issue-with-pulumiverse-vercel": "The sed command below patches the version of @pulumiverse/vercel in the sst3 platform package to a version that has the fix for the Pulumi signature issue.",
+    "postinstall": "cd node_modules/sst3/platform && sed -i.bak 's/\"@pulumiverse\\/vercel\": \"1.11.0\"/\"@pulumiverse\\/vercel\": \"1.14.2\"/' package.json && npm install"
   },
   "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
   "license": "MIT",

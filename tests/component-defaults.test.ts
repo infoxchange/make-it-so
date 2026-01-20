@@ -79,9 +79,10 @@ describe("setupComponentDefaults", () => {
       await import("../src/lib/sst/component-defaults.js")
     ).default;
 
-    let transformCallback: ((...args: unknown[]) => unknown) | undefined;
+    let transformCallback: ((...args: never[]) => unknown) | undefined;
     const mockTransform = vi.fn(
-      (component: unknown, callback: (...args: unknown[]) => unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (component: any, callback: any) => {
         transformCallback = callback;
       },
     );
@@ -112,7 +113,8 @@ describe("setupComponentDefaults", () => {
     ).default;
 
     const mockTransform = vi.fn(
-      (component: unknown, callback: (...args: unknown[]) => unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (component: any, callback: any) => {
         expect(() => {
           callback(undefined, {}, "TestComponent");
         }).toThrow("No args provided");
