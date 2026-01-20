@@ -7,8 +7,8 @@
   "scripts": {
     "build": "tsx build.ts",
     "commit": "lint-staged && commit",
-    "lint": "eslint . --fix && prettier . --write && tsc --noEmit",
-    "lint:check": "eslint . && prettier . --check && tsc --noEmit",
+    "lint": "eslint . --fix && prettier . --write && tsc --noEmit --emitDeclarationOnly false",
+    "lint:check": "eslint . && prettier . --check && tsc --noEmit --emitDeclarationOnly false",
     "prepare": "husky",
     "test": "vitest",
     "postinstall": "cd node_modules/sst3/platform && npm install"
