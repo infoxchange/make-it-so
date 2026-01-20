@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-
 describe("dns", () => {
   it("should create DNS adapter with default configuration", async () => {
     const { dns } = await import("../src/components/ix/dns.js");
@@ -30,10 +29,10 @@ describe("dns", () => {
 
   it("should create DNS adapter with transform function", async () => {
     const { dns } = await import("../src/components/ix/dns.js");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transformFn = (args: any) => {
-      args.ttl = 300;
-      return args;
+    const transformFn = () => {
+      // Transform function must return undefined according to Transform type
+      // It modifies args in place
+      return undefined;
     };
     const dnsAdapter = dns({
       transform: {

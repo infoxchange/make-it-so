@@ -18,7 +18,10 @@ describe("setupComponentDefaults", () => {
       await import("../src/lib/sst/component-defaults.js")
     ).default;
 
-    const mockTransform = vi.fn();
+    const mockTransform = vi.fn() as <T, Args, Options>(
+      resource: { new (name: string, args: Args, opts?: Options): T },
+      cb: (args: Args, opts: Options, name: string) => void,
+    ) => void;
     const mockSst = {
       aws: {
         StaticSite: {},
@@ -42,7 +45,10 @@ describe("setupComponentDefaults", () => {
       await import("../src/lib/sst/component-defaults.js")
     ).default;
 
-    const mockTransform = vi.fn();
+    const mockTransform = vi.fn() as <T, Args, Options>(
+      resource: { new (name: string, args: Args, opts?: Options): T },
+      cb: (args: Args, opts: Options, name: string) => void,
+    ) => void;
     const mockSst = {
       aws: {
         StaticSite: {},
@@ -79,13 +85,18 @@ describe("setupComponentDefaults", () => {
       await import("../src/lib/sst/component-defaults.js")
     ).default;
 
-    let transformCallback: ((...args: never[]) => unknown) | undefined;
-    const mockTransform = vi.fn(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (component: any, callback: any) => {
-        transformCallback = callback;
-      },
-    );
+    let transformCallback:
+      | ((args: unknown, opts: unknown, name: string) => void)
+      | undefined;
+    const mockTransform = ((
+      _component: { new (name: string, ...args: unknown[]): unknown },
+      callback: (args: unknown, opts: unknown, name: string) => void,
+    ) => {
+      transformCallback = callback;
+    }) as <T, Args, Options>(
+      resource: { new (name: string, args: Args, opts?: Options): T },
+      cb: (args: Args, opts: Options, name: string) => void,
+    ) => void;
 
     const mockSst = {
       aws: {
@@ -113,13 +124,18 @@ describe("setupComponentDefaults", () => {
     ).default;
 
     const mockTransform = vi.fn(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (component: any, callback: any) => {
+      (
+        _component: { new (name: string, ...args: unknown[]): unknown },
+        callback: (args: unknown, opts: unknown, name: string) => void,
+      ) => {
         expect(() => {
           callback(undefined, {}, "TestComponent");
         }).toThrow("No args provided");
       },
-    );
+    ) as unknown as <T, Args, Options>(
+      resource: { new (name: string, args: Args, opts?: Options): T },
+      cb: (args: Args, opts: Options, name: string) => void,
+    ) => void;
 
     const mockSst = {
       aws: {
