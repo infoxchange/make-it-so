@@ -87,7 +87,7 @@ const schema = z.discriminatedUnion("isIxDeploy", [
   nonIxDeployConfigSchema,
 ]);
 
-export default schema.parse(getEnvVars());
+export const deployConfig = schema.parse(getEnvVars());
 
 // process.env values can change at runtime so we provide a way to re-parse the config as needed
 export const getDeployConfig = () => schema.parse(getEnvVars());
