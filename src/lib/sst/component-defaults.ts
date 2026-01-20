@@ -1,11 +1,11 @@
 import { $transform as sst3$transform } from "sst3/platform/src/components/component";
 import type * as aws from "sst3/platform/src/components/aws";
 import type * as cloudflare from "sst3/platform/src/components/cloudflare";
-import { dns } from "@/components/ix/dns";
+import { dns } from "@infoxchange/make-it-so/components/ix";
 import { output } from "@pulumi/pulumi";
 import { getDeployConfig } from "@/deployConfig";
 
-export default function setupComponentDefaults({
+export function setupComponentDefaults({
   $transform,
   sst: partiallyTypedSst,
 }: {
@@ -78,3 +78,5 @@ function addDefaultDomain(
     });
   }
 }
+
+export default setupComponentDefaults;

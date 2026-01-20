@@ -1,6 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import ixDeployConfig from "@/deployConfig";
+import { deployConfig } from "@infoxchange/make-it-so";
 import { Transform, transform } from "sst3/platform/src/components/component";
 
 export interface InternalNetworkArgs {
@@ -60,7 +60,7 @@ export class InternalNetwork extends pulumi.ComponentResource {
   }
 
   static getVpcSubnetIds(): pulumi.Output<string[]> {
-    const { workloadGroup, appName } = ixDeployConfig;
+    const { workloadGroup, appName } = deployConfig;
     let suffix = "";
     if (workloadGroup === "ds") {
       const possibleSuffixes = ["", "-2"];

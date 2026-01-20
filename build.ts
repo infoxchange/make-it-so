@@ -22,7 +22,9 @@ const external = [
   ...Object.keys(packageJson.dependencies || {}).filter(
     (dep) => dep !== "sst3",
   ),
-  "@infoxchange/make-it-so/*", // Self-references should be external
+  // Self-references should be external
+  "@infoxchange/make-it-so/*",
+  "@infoxchange/make-it-so",
 ];
 
 // Build ESM

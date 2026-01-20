@@ -4,7 +4,9 @@
     "module": "es2022",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@infoxchange/make-it-so/components/ix": ["src/components/ix/index.ts"],
+      "@infoxchange/make-it-so": ["src/index.ts"]
     },
     "noEmit": true
   },
