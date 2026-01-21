@@ -3,6 +3,9 @@
   "version": "0.0.0-version-set-when-releasing",
   "description": "Makes deploying services to IX infra easy",
   "repository": "github:infoxchange/make-it-so",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",
