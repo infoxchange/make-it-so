@@ -5,7 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@infoxchange/make-it-so/components/ix": ["src/components/ix/index.ts"],
+      // These should correspond with the different bundles (from different entrypoints) produced by ./build.ts
+      "@infoxchange/make-it-so/components": ["src/components/index.ts"],
       "@infoxchange/make-it-so": ["src/index.ts"]
     },
     "noEmit": true

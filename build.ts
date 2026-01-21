@@ -30,6 +30,11 @@ const external = [
 
 // Build ESM
 await esbuild.build({
+  // Code that gets compiled into one bundle should only import code that will be compiled into a different bundle via
+  // the package name (e.g. "@infoxchange/make-it-so/components") rather than directly importing the source
+  // (e.g. "./src/components/index.ts") to avoid esbuild including the imported code in both bundles. To allow these
+  // package name imports to work even when the source hasn't been built (and thus the package exports point to
+  // non-existent files) these imports also be reflected in tsconfig.json path aliases.
   entryPoints: ["src/components/index.ts", "src/index.ts"],
   bundle: true,
   platform: "node",

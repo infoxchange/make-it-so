@@ -1,4 +1,4 @@
-import { dns } from "@infoxchange/make-it-so/components/ix";
+import { ix } from "@infoxchange/make-it-so/components";
 import { ComponentResourceOptions, output } from "@pulumi/pulumi";
 import { getDeployConfig } from "@/deployConfig";
 
@@ -34,7 +34,7 @@ function addDefaultDomain(args: SiteArgs | undefined, name: string) {
   }
   const domainArgs = {
     name: getDeployConfig().siteDomains[0],
-    dns: dns(),
+    dns: ix.dns(),
   };
   if (!("domain" in args)) {
     args.domain = domainArgs;
