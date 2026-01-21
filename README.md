@@ -1,6 +1,6 @@
-# Make It So
+# Make It So (for SST v2 - see main branch for SST v3 support)
 
-[![NPM Version](https://img.shields.io/npm/v/%40infoxchange%2Fmake-it-so)](https://www.npmjs.com/package/@infoxchange/make-it-so)
+[![NPM Version](https://img.shields.io/npm/v/%40infoxchange%2Fmake-it-so-sst-v2)](https://www.npmjs.com/package/@infoxchange/make-it-so-sst-v2)
 
 A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST (version 2)](https://v2.sst.dev/what-is-sst) which is extending to take care the IX related specifics.
 
@@ -8,9 +8,9 @@ A helpful little library that allows you to deploy apps on Infoxchange's (IX) in
 
 ```shell
 # NPM
-npm --save-dev @infoxchange/make-it-so
+npm --save-dev @infoxchange/make-it-so-sst-v2
 # Yarn
-yarn add --dev @infoxchange/make-it-so
+yarn add --dev @infoxchange/make-it-so-sst-v2
 ```
 
 ## Features
@@ -22,7 +22,7 @@ The IX pipeline provides certain information about the deployment currently in p
 ```typescript
 import deployConfig, {
   getDeployConfig,
-} from "@infoxchange/make-it-so/deployConfig";
+} from "@infoxchange/make-it-so-sst-v2/deployConfig";
 
 if (deployConfig.isIxDeploy) {
   console.log(
@@ -97,7 +97,7 @@ Unlike [NextjsSite](https://v2.sst.dev/constructs/NextjsSite), any environment v
 | auth.prefix                          | string                                                           | (optional) A custom path to be used for the auth route.                                                                                                                                                                                                                                                                    |
 
 ```typescript
-import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxNextjsSite } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const site = new IxNextjsSite(stack, "Site", {
   environment: {
@@ -140,7 +140,7 @@ Also if `isIxManagedDomain` is true DNS records will be automatically created fo
 | auth.prefix                          | string   | (optional) A custom path to be used for the auth route.                                                                                                                                             |
 
 ```typescript
-import { IxStaticSite } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxStaticSite } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const site = new IxStaticSite(stack, "Site", {
   environment: {
@@ -164,7 +164,7 @@ IxApi extends [SST's Api](https://v2.sst.dev/constructs/Api) and takes the exact
 It will automatically create certificates and DNS records for a single domain that the API should deploy to. If the props `customDomain` is not set the first site domain provided by the IX deployment pipeline will be used as the domain. Explicitly setting `customDomain` to `undefined` will ensure no customDomain is used. Regardless of if a custom domain is set, the API Gateway will still be accessible via the 'api-id.execute-api.region.amazonaws.com' url.
 
 ```typescript
-import { IxApi } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxApi } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const site = new IxApi(stack, "api", {
   // The default behaviour is the same as if you included:
@@ -182,7 +182,7 @@ const site = new IxApi(stack, "api", {
 It will also automatically attach the cluster to the standard IX VPC created in each workload account (unless you explicitly pass a different VPC to be attached with the vpc prop or set the vpc prop to `undefined` which will stop any VPC being attached).
 
 ```typescript
-import { IxElasticache } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxElasticache } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const redisCluster = new IxElasticache(stack, "elasticache", {
   autoMinorVersionUpgrade: true,
@@ -213,7 +213,7 @@ const redisCluster = new IxElasticache(stack, "elasticache", {
 <summary><strong>IxCertificate</strong> - Creates a new DNS validated ACM certificate for a domain managed by IX.</summary>
 
 ```typescript
-import { IxCertificate } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxCertificate } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const domainCert = new IxCertificate(scope, "ExampleDotComCertificate", {
   domainName: "example.com",
@@ -238,7 +238,7 @@ const domainCert = new IxCertificate(scope, "ExampleDotComCertificate", {
 Route53 HostedZones for IX managed domains live in the dns-hosting AWS account so if a workload AWS account requires a DNS record to be created this must be done "cross-account". IxDnsRecord handles that part for you. Just give it the details for the DNS record itself and IxDnsRecord will worry about creating it.
 
 ```typescript
-import { IxDnsRecord } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxDnsRecord } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 new IxDnsRecord(scope, "IxDnsRecord", {
   type: "A",
@@ -266,7 +266,7 @@ new IxDnsRecord(scope, "IxDnsRecord", {
 <summary><strong>IxSESIdentity</strong> - Creates an SES domain identity for a domain managed by IX.</summary>
 
 ```typescript
-import { IxSESIdentity } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxSESIdentity } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 new IxSESIdentity(scope, "IxSESIdentity", {
   // Email identity domain will be: example.dev.ixapps.org
@@ -289,7 +289,7 @@ new IxSESIdentity(scope, "IxSESIdentity", {
 <summary><strong>IxWebsiteRedirect</strong> - Creates a redirect from one domain to another.</summary>
 
 ```typescript
-import { IxWebsiteRedirect } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxWebsiteRedirect } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 new IxWebsiteRedirect(scope, "WebsiteRedirect", {
   recordNames: ["www.example.com", "othersubdomain.example.com"],
@@ -311,7 +311,7 @@ new IxWebsiteRedirect(scope, "WebsiteRedirect", {
 <summary><strong>IxVpcDetails</strong> - Fetches the standard VPC and subnets that exist in all IX workload aws accounts.</summary>
 
 ```typescript
-import { IxVpcDetails } from "@infoxchange/make-it-so/cdk-constructs";
+import { IxVpcDetails } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
 
 const vpcDetails = new IxVpcDetails(scope, "VpcDetails");
 ```
@@ -332,8 +332,8 @@ To deploy a Next.js based site you would include a `sst.config.ts` file at the r
 
 ```typescript
 import { SSTConfig } from "sst";
-import { IxNextjsSite } from "@infoxchange/make-it-so/cdk-constructs";
-import deployConfig from "@infoxchange/make-it-so/deployConfig";
+import { IxNextjsSite } from "@infoxchange/make-it-so-sst-v2/cdk-constructs";
+import deployConfig from "@infoxchange/make-it-so-sst-v2/deployConfig";
 
 export default {
   config: () => ({
@@ -374,4 +374,4 @@ Commit messages must be formatted in the [Conventional Commits](https://www.conv
 
 If adding a new construct the easiest way to develop it maybe by building it in whatever app repo it is intended to be used in. When it appears to be working correctly it can be moved into make-it-so and the app can be updated to import that construct from make-it-so.
 
-To test change a change in make-it-so create a branch starting with the prefix "internal-testing-". When pushed the CI will release a new package with a pre-release version. It'll look a little something like `2.1.3-internal-testing-name-of-feature.3`. A serverless app using make-it-so can be modified to use this package version and then deployed to a dev environment to test that the make-it-so changes are functioning correctly. Once a change has been merged into main and there are no serverless apps using the pre-release package any more it's a good idea to [delete that version](https://docs.npmjs.com/unpublishing-packages-from-the-registry#unpublishing-a-single-version-of-a-package) to keep the [npm package version history clean](https://www.npmjs.com/package/@infoxchange/make-it-so?activeTab=versions).
+To test change a change in make-it-so create a branch starting with the prefix "internal-testing-". When pushed the CI will release a new package with a pre-release version. It'll look a little something like `2.1.3-internal-testing-name-of-feature.3`. A serverless app using make-it-so can be modified to use this package version and then deployed to a dev environment to test that the make-it-so changes are functioning correctly. Once a change has been merged into main and there are no serverless apps using the pre-release package any more it's a good idea to [delete that version](https://docs.npmjs.com/unpublishing-packages-from-the-registry#unpublishing-a-single-version-of-a-package) to keep the [npm package version history clean](https://www.npmjs.com/package/@infoxchange/make-it-so-sst-v2?activeTab=versions).
