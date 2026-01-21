@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "*"
-      - "!main"
+      - "!sst-v2"
       - "!internal-testing-*"
   pull_request: # We also run on PRs to verify the commit messages of all commits in the PR
     branches:
