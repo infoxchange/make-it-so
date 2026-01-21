@@ -11,7 +11,7 @@ import {
 } from "./helpers/test-utils.js";
 import { StaticSiteArgs } from "sst3/platform/src/components/aws/static-site.js";
 
-describe("setupComponentDefaults", () => {
+describe("setup", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.resetAllMocks();
@@ -20,19 +20,17 @@ describe("setupComponentDefaults", () => {
     setupSstGlobals();
   });
 
-  it("should export setupComponentDefaults function", async () => {
-    const module = await import("../src/lib/sst/component-defaults.js");
+  it("should export setup function", async () => {
+    const module = await import("../src/components/setup-components.js");
 
-    expect(module.setupComponentDefaults).toBeDefined();
-    expect(typeof module.setupComponentDefaults).toBe("function");
+    expect(module.setup).toBeDefined();
+    expect(typeof module.setup).toBe("function");
   });
 
   it("should call $transform for each component type", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     // Should be called once for each site component (10 total)
     expect($transform).toHaveBeenCalledTimes(10);
@@ -49,11 +47,9 @@ describe("setupComponentDefaults", () => {
   });
 
   it("should add default domain to site constructs without domain", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     const transformCallback = getCapturedTransformCallback();
     assertDefined(transformCallback);
@@ -75,11 +71,9 @@ describe("setupComponentDefaults", () => {
   });
 
   it("should add dns to string domain in site constructs", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     const transformCallback = getCapturedTransformCallback();
     assertDefined(transformCallback);
@@ -105,11 +99,9 @@ describe("setupComponentDefaults", () => {
   });
 
   it("should add dns to domain object without dns in site constructs", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     const transformCallback = getCapturedTransformCallback();
     assertDefined(transformCallback);
@@ -137,11 +129,9 @@ describe("setupComponentDefaults", () => {
   });
 
   it("should not add domain when explicitly set to undefined", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     const transformCallback = getCapturedTransformCallback();
     assertDefined(transformCallback);
@@ -160,11 +150,9 @@ describe("setupComponentDefaults", () => {
   });
 
   it("should not add dns when domain.dns is explicitly set to undefined", async () => {
-    const { setupComponentDefaults } = await import(
-      "../src/lib/sst/component-defaults.js"
-    );
+    const { setup } = await import("../src/components/setup-components.js");
 
-    setupComponentDefaults();
+    setup();
 
     const transformCallback = getCapturedTransformCallback();
     assertDefined(transformCallback);

@@ -8,11 +8,11 @@ describe("Package Exports", () => {
     expect(typeof exports.getDeployConfig).toBe("function");
   });
 
-  it("should export setupComponentDefaults from lib/sst", async () => {
-    const exports = await import("../src/lib/sst/component-defaults.js");
+  it("should export setup from lib/sst", async () => {
+    const exports = await import("../src/components/setup-components.js");
 
-    expect(exports.setupComponentDefaults).toBeDefined();
-    expect(typeof exports.setupComponentDefaults).toBe("function");
+    expect(exports.setup).toBeDefined();
+    expect(typeof exports.setup).toBe("function");
   });
 
   it("should export proxy fetch functions from main index", async () => {

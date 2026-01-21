@@ -64,12 +64,12 @@ To make [SST components](https://sst.dev/docs/) more inline with Infoxchange's i
 following to the start of an `sst.config.ts`'s `run()` function:
 
 ```typescript
-await import("@infoxchange/make-it-so").then((module) =>
-  module.setupComponentDefaults(),
+await import("@infoxchange/make-it-so/components").then((module) =>
+  module.setup(),
 );
 ```
 
-The changes made by `setupComponentDefaults()` takes the form of setting sensible (for an IX context) defaults for the
+The changes made by `setup()` takes the form of setting sensible (for an IX context) defaults for the
 accepted args of those components. These changes include:
 
 - If a domain is not provided for site components like StaticSite or NextjsSite the domain will automatically be set to
@@ -124,9 +124,7 @@ export default $config({
   },
   async run() {
     // Apply Make It So customisations to SST components
-    await import("@infoxchange/make-it-so").then((module) =>
-      module.setupComponentDefaults(),
-    );
+    await import("@infoxchange/make-it-so").then((module) => module.setup());
 
     // Create a new static site
     new sst.aws.StaticSite("MySite", {
