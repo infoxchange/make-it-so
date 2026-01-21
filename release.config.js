@@ -1,5 +1,5 @@
 export default {
-  branches: ["main", { name: "internal-testing-*", prerelease: true }],
+  branches: ["sst-v2", { name: "internal-testing-*", prerelease: true }],
   preset: "conventionalcommits",
   plugins: [
     [
