@@ -2,7 +2,15 @@
 
 [![NPM Version](https://img.shields.io/npm/v/%40infoxchange%2Fmake-it-so)](https://www.npmjs.com/package/@infoxchange/make-it-so)
 
-A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will worry about making it happen. Most of the heavily lifting is done by [SST](https://sst.dev) which is extending to take care the IX related specifics.
+A helpful little library that allows you to deploy apps on Infoxchange's (IX) infrastructure without having to specify
+all the implementation details that are specific to IX's deployment environment. You tell it what you want and it will
+worry about making it happen. Most of the heavily lifting is done by [SST](https://sst.dev) which is extending to take
+care the IX related specifics.
+
+> [!WARNING]
+> If the app is using SST v2 then you should use the
+> [@infoxchange/make-it-so-sst-v2 npm package](https://www.npmjs.com/package/@infoxchange/make-it-so-sst-v2) which is
+> built from the [sst-v2 branch](https://github.com/infoxchange/make-it-so/tree/sst-v2).
 
 ## Installation
 
