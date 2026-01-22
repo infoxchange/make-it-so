@@ -3,22 +3,25 @@
   "version": "0.0.0-version-set-when-releasing",
   "description": "Makes deploying services to IX infra easy",
   "repository": "github:infoxchange/make-it-so",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest",
-    "lint": "eslint . --fix && prettier . --write && tsc --noEmit",
-    "lint:check": "eslint . && prettier . --check && tsc --noEmit",
+    "build": "tsx build.ts",
+    "commit": "lint-staged && commit",
+    "lint": "eslint . --fix && prettier . --write && tsc --noEmit --emitDeclarationOnly false",
+    "lint:check": "eslint . && prettier . --check && tsc --noEmit --emitDeclarationOnly false",
     "prepare": "husky",
-    "commit": "lint-staged && commit"
+    "test": "vitest",
+    "//fix-signature-issue-with-pulumiverse-vercel": "The sed command below patches the version of @pulumiverse/vercel in the sst3 platform package to a version that has the fix for the Pulumi signature issue.",
+    "postinstall": "! test -d node_modules/sst3 || ( cd node_modules/sst3/platform && sed -i.bak 's/\"@pulumiverse\\/vercel\": \"1.11.0\"/\"@pulumiverse\\/vercel\": \"3.1.1\"/' package.json && echo 'Installing SST v3 dependencies' && npm install )"
   },
   "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
   "license": "MIT",
   "exports": {
-    "./cdk-constructs": "./dist/cdk-constructs/index.js",
-    "./deployConfig": "./dist/deployConfig.js",
-    "./auth": "./dist/lib/auth/index.js",
-    "./proxy": "./dist/lib/proxy/index.js"
+    ".": "./dist/index.js",
+    "./components": "./dist/components/index.js"
   },
   "lint-staged": {
     "**/*": [
@@ -33,10 +36,10 @@
     "@eslint/js": "^9.3.0",
     "@tsconfig/node21": "^21.0.3",
     "@types/aws-cloudfront-function": "^1.0.6",
+    "@types/aws-lambda": "8.10.159",
     "@types/global-agent": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "aws-cdk-lib": "2.142.1",
-    "constructs": "^10.3.0",
+    "esbuild": "^0.27.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.3.0",
@@ -44,15 +47,16 @@
     "lint-staged": "^15.2.5",
     "prettier": "3.2.5",
     "semantic-release": "^23.1.1",
-    "sst": "2.42.0",
+    "sst3": "github:anomalyco/sst",
+    "tsx": "^4.7.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.11.0",
+    "vite-tsconfig-paths": "^6.0.4",
     "vitest": "^1.6.0"
   },
   "peerDependencies": {
-    "aws-cdk-lib": "^2.0.0",
-    "constructs": "^10.0.0",
-    "sst": "^2.0.0"
+    "@pulumi/aws": "^7.16.0",
+    "@pulumi/pulumi": "^3.216.0"
   },
   "dependencies": {
     "global-agent": "^3.0.0",

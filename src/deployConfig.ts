@@ -27,12 +27,18 @@ const ixDeployConfigSchema = z
     environment: z.enum(["dev", "test", "uat", "prod"]),
     workloadGroup: z.enum(["ds", "srs"]),
     primaryAwsRegion: z.literal("ap-southeast-2"),
-    siteDomains: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
-    siteDomainAliases: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomains: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
+    siteDomainAliases: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
     isInternalApp: z.coerce.boolean(),
     deploymentType: z.enum(["docker", "serverless"]),
     sourceCommitRef: z.string().min(1),
@@ -81,7 +87,7 @@ const schema = z.discriminatedUnion("isIxDeploy", [
   nonIxDeployConfigSchema,
 ]);
 
-export default schema.parse(getEnvVars());
+export const deployConfig = schema.parse(getEnvVars());
 
 // process.env values can change at runtime so we provide a way to re-parse the config as needed
 export const getDeployConfig = () => schema.parse(getEnvVars());

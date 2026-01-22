@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "dist"
+    "moduleResolution": "bundler",
+    "module": "es2022",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      // These should correspond with the different bundles (from different entrypoints) produced by ./build.ts
+      "@infoxchange/make-it-so/components": ["src/components/index.ts"],
+      "@infoxchange/make-it-so": ["src/index.ts"]
+    },
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
   "extends": "@tsconfig/node21/tsconfig.json"
 }
