@@ -63,3 +63,11 @@ jobs:
           else
             echo "### No publishable changes made since last version" >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: |
+            ~/.npm/_logs/*
