@@ -75,3 +75,11 @@ jobs:
             echo "### $message" >> $GITHUB_STEP_SUMMARY
             echo -e "\e[1m$message\e[0m"
           fi
+
+      - name: Upload Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: |
+            ~/.npm/_logs/*
