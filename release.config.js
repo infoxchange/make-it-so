@@ -1,5 +1,19 @@
+import { execSync } from "child_process";
+
+const gitCommit = getGitShortCommit();
+
 export default {
-  branches: ["main", { name: "internal-testing-*", prerelease: true }],
+  branches: [
+    "main",
+    {
+      name: "sst-v2",
+      range: "2.x.x",
+    },
+    {
+      name: "internal-testing-*",
+      prerelease: `\${name}-${gitCommit}`,
+    },
+  ],
   preset: "conventionalcommits",
   plugins: [
     [
@@ -27,3 +41,12 @@ export default {
     "@semantic-release/github",
   ],
 };
+
+function getGitShortCommit() {
+  try {
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+  } catch (error) {
+    console.error("Failed to get git commit hash:", error);
+    return "unknown";
+  }
+}
