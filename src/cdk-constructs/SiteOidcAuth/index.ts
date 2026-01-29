@@ -274,7 +274,7 @@ export class SiteOidcAuth extends Construct {
         scope,
         `${this.id}AllowAllCookiesPolicy`,
         {
-          cachePolicyName: `${this.id}-AllowAllCookiesPolicy`,
+          cachePolicyName: `${CDK.Stack.of(scope).stackName}-${this.id}-AllowAllCookiesPolicy`,
           comment: "Cache policy that forwards all cookies",
           defaultTtl: CDK.Duration.seconds(1),
           minTtl: CDK.Duration.seconds(1),
