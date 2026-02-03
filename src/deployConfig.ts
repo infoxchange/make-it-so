@@ -18,6 +18,7 @@ const getEnvVars = () =>
     smtpPort: process.env.SMTP_PORT ?? "",
     clamAVUrl: process.env.CLAMAV_URL ?? "",
     vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
+    alarmSnsTopic: process.env.IX_ALARM_SNS_TOPIC ?? "",
   }) satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
@@ -48,6 +49,7 @@ const ixDeployConfigSchema = z
     smtpPort: z.coerce.number().int(),
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
+    alarmSnsTopic: z.string().min(1),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
@@ -79,6 +81,7 @@ const nonIxDeployConfigSchema = z
       ),
     clamAVUrl: z.string(),
     vpcHttpProxy: z.string(),
+    alarmSnsTopic: z.string(),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
