@@ -18,7 +18,10 @@ const getEnvVars = () =>
     smtpPort: process.env.SMTP_PORT ?? "",
     clamAVUrl: process.env.CLAMAV_URL ?? "",
     vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
-    alarmSnsTopic: process.env.IX_ALARM_SNS_TOPIC ?? "",
+    alarmSnsTopic:
+      process.env.IX_ALARM_SNS_TOPIC ??
+      process.env.IX_ALARM_SNS_TOPIC_TO_SYSTEMS ??
+      "",
   }) satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
