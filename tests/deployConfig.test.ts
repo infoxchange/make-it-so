@@ -30,6 +30,8 @@ describe("deployConfig", () => {
       process.env.SMTP_PORT = "587";
       process.env.CLAMAV_URL = "http://clamav.example.com";
       process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
+      process.env.IX_ALARM_SNS_TOPIC =
+        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -75,6 +77,8 @@ describe("deployConfig", () => {
         process.env.SMTP_PORT = "25";
         process.env.CLAMAV_URL = "http://clamav.example.com";
         process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
+        process.env.IX_ALARM_SNS_TOPIC =
+          "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
         const { getDeployConfig } = await import("../src/deployConfig.js");
         const config = getDeployConfig();
@@ -101,6 +105,8 @@ describe("deployConfig", () => {
       process.env.SMTP_PORT = "587";
       process.env.CLAMAV_URL = "http://clamav.example.com";
       process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
+      process.env.IX_ALARM_SNS_TOPIC =
+        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -130,6 +136,8 @@ describe("deployConfig", () => {
       process.env.SMTP_PORT = "587";
       process.env.CLAMAV_URL = "http://clamav.example.com";
       process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
+      process.env.IX_ALARM_SNS_TOPIC =
+        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       expect(() => getDeployConfig()).toThrow();
@@ -152,6 +160,8 @@ describe("deployConfig", () => {
       process.env.SMTP_PORT = "587";
       process.env.CLAMAV_URL = "http://clamav.example.com";
       process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
+      process.env.IX_ALARM_SNS_TOPIC =
+        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       expect(() => getDeployConfig()).toThrow();
@@ -184,6 +194,8 @@ describe("deployConfig", () => {
       process.env.SMTP_PORT = "1025";
       process.env.CLAMAV_URL = "http://localhost:3310";
       process.env.VPC_HTTP_PROXY = "http://localhost:8080";
+      process.env.IX_ALARM_SNS_TOPIC =
+        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
