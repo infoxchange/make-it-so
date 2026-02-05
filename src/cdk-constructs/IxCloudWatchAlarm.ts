@@ -287,6 +287,14 @@ function setupCloudFrontAlarm(
     // which is why we make all props not optional here since we'll get an error if we're missing one
   } satisfies RequiredButAllowUndefined<PutMetricAlarmCommandInput>;
 
+  const expectedAlarmArn = CDK.Stack.of(scope).formatArn({
+    service: "cloudwatch",
+    resource: "alarm",
+    resourceName: props.alarmName,
+    region: region,
+    arnFormat: CDK.ArnFormat.COLON_RESOURCE_NAME,
+  });
+
   // Custom resource to create / update / delete the CloudWatch alarm in us-east-1
   new CdkCustomResources.AwsCustomResource(scope, "CloudFrontAlarm", {
     onCreate: {
@@ -294,18 +302,16 @@ function setupCloudFrontAlarm(
       action: "putMetricAlarm",
       region,
       parameters: alarmParams,
-      physicalResourceId: CdkCustomResources.PhysicalResourceId.of(
-        props.alarmName,
-      ),
+      physicalResourceId:
+        CdkCustomResources.PhysicalResourceId.of(expectedAlarmArn),
     },
     onUpdate: {
       service: "CloudWatch",
       action: "putMetricAlarm",
       region,
       parameters: alarmParams,
-      physicalResourceId: CdkCustomResources.PhysicalResourceId.of(
-        props.alarmName,
-      ),
+      physicalResourceId:
+        CdkCustomResources.PhysicalResourceId.of(expectedAlarmArn),
     },
     onDelete: {
       service: "CloudWatch",
