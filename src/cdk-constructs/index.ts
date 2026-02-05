@@ -7,4 +7,5 @@ export * from "./IxStaticSite.js";
 export * from "./IxElasticache.js";
 export * from "./IxApi.js";
 export * from "./IxQuicksightWorkspace.js";
+export * from "./IxCloudWatchAlarm.js";
 export * from "./SiteOidcAuth/index.js";
