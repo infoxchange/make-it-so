@@ -8,9 +8,7 @@ worry about making it happen. Most of the heavily lifting is done by [SST](https
 care the IX related specifics.
 
 > [!WARNING]
-> If the app is using SST v2 then you should use the
-> [@infoxchange/make-it-so-sst-v2 npm package](https://www.npmjs.com/package/@infoxchange/make-it-so-sst-v2) which is
-> built from the [sst-v2 branch](https://github.com/infoxchange/make-it-so/tree/sst-v2).
+> If your app uses SST v2 (rather than v3) then you should use the [sst-v2 branch](https://github.com/infoxchange/make-it-so/tree/sst-v2) for Make It So.
 
 ## Installation
 
