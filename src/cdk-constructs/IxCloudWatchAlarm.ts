@@ -39,6 +39,7 @@ type CloudWatchAlarmProps = Omit<
         option: typeof CloudWatch.ComparisonOperator,
       ) => CloudWatch.ComparisonOperator);
   actions?: AlarmActions;
+  toNotify?: string[];
 };
 
 type NormalizedCloudWatchAlarmProps = Omit<CloudWatch.AlarmProps, "metric"> & {
@@ -50,8 +51,20 @@ export class IxCloudWatchAlarm extends Construct {
   constructor(scope: Construct, id: string, props: CloudWatchAlarmProps) {
     super(scope, id);
 
+    if (props.toNotify && props.alarmDescription?.includes(". notify:")) {
+      throw new Error(
+        "Alarm description cannot include '. notify:' if using the toNotify property.",
+      );
+    }
+
     const normalizedProps = {
       ...props,
+      alarmDescription: [
+        props.alarmDescription,
+        props.toNotify ? `notify: ${props.toNotify.join(",")}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n"),
       metric: {
         ...props.metric,
         period:
