@@ -233,6 +233,71 @@ const domainCert = new IxCertificate(scope, "ExampleDotComCertificate", {
 </details>
 
 <details>
+<summary><strong>IxCloudWatchAlarm</strong> - Creates a CloudWatch alarm with IX-specific defaults.</summary>
+
+IxCloudWatchAlarm extends AWS CDK's CloudWatch Alarm functionality with IX-specific defaults and special handling for
+CloudFront alarms (which must be created in us-east-1). If no actions are specified, the alarm will automatically use
+the IX alarm SNS topic which sends alerts to MS Teams. Who is tagged in these alerts can be configured with the
+`toNotify` property.
+
+```typescript
+import { IxCloudWatchAlarm } from "@infoxchange/make-it-so/cdk-constructs";
+
+new IxCloudWatchAlarm(scope, "ApiErrorAlarm", {
+  alarmName: "high-error-rate",
+  alarmDescription: "Alert when API error rate is too high",
+  metric: {
+    namespace: "AWS/ApiGateway",
+    metricName: "5XXError",
+    dimensionsMap: {
+      ApiName: "my-api",
+    },
+    period: (Duration) => Duration.minutes(5),
+    statistic: (Stats) => Stats.AVERAGE,
+  },
+  threshold: 10,
+  evaluationPeriods: 2,
+  comparisonOperator: (ComparisonOperator) =>
+    ComparisonOperator.GREATER_THAN_THRESHOLD,
+  toNotify: ["Receiver Name", "Second Receiver"], // Receivers are defined in aws-gov under components/infra-event-notification
+});
+```
+
+#### Options:
+
+| Prop                       | Type                                                               | Description                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| metric                     | object                                                             | Metric configuration                                                                                                                        |
+| metric.namespace           | string                                                             | The namespace of the metric (e.g., "AWS/ApiGateway")                                                                                        |
+| metric.metricName          | string                                                             | The name of the metric                                                                                                                      |
+| metric.dimensionsMap       | Record<string, string>                                             | (optional) Dimensions for the metric                                                                                                        |
+| metric.period              | Duration \| ((Duration) => Duration)                               | (optional) The period over which the statistic is applied. Can be a function for easier access to CDK Duration helpers                      |
+| metric.statistic           | string \| ((Stats) => string)                                      | (optional) The statistic to apply (e.g., "Average", "Sum"). Can be a function for easier access to CloudWatch.Stats helpers                 |
+| comparisonOperator         | ComparisonOperator \| ((ComparisonOperator) => ComparisonOperator) | How to compare the metric to the threshold. Can be a function for easier access to CloudWatch.ComparisonOperator helpers                    |
+| threshold                  | number                                                             | The value to compare the metric against                                                                                                     |
+| evaluationPeriods          | number                                                             | The number of periods over which data is compared to the threshold                                                                          |
+| treatMissingData           | TreatMissingData \| ((TreatMissingData) => TreatMissingData)       | (optional) How to treat missing data points. Can be a function for easier access to CloudWatch.TreatMissingData helpers                     |
+| alarmName                  | string                                                             | (optional) Name of the alarm                                                                                                                |
+| alarmDescription           | string                                                             | (optional) Description of the alarm                                                                                                         |
+| toNotify                   | string[]                                                           | (optional) List receivers to be notified on alarm state changes. Receivers are defined in aws-gov under components/infra-event-notification |
+| actions                    | object                                                             | (optional) Actions to take when alarm state changes. If not provided, defaults to IX alarm SNS topic                                        |
+| actions.onOk               | (string \| IAlarmAction)[]                                         | (optional) Actions to take when alarm goes to OK state                                                                                      |
+| actions.onAlarm            | (string \| IAlarmAction)[]                                         | (optional) Actions to take when alarm goes to ALARM state                                                                                   |
+| actions.onInsufficientData | (string \| IAlarmAction)[]                                         | (optional) Actions to take when alarm goes to INSUFFICIENT_DATA state                                                                       |
+| [...CloudWatch.AlarmProps] |                                                                    | Any other props accepted by [CloudWatch.Alarm](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudwatch.Alarm.html)           |
+
+#### Static Properties:
+
+IxCloudWatchAlarm provides access to various CloudWatch constants:
+
+- `IxCloudWatchAlarm.Stats` - CloudWatch.Stats for metric statistics
+- `IxCloudWatchAlarm.Duration` - CDK.Duration for time periods
+- `IxCloudWatchAlarm.TreatMissingData` - CloudWatch.TreatMissingData for handling missing data
+- `IxCloudWatchAlarm.ComparisonOperator` - CloudWatch.ComparisonOperator for comparison operations
+
+</details>
+
+<details>
 <summary><strong>IxDnsRecord</strong> - Creates a DNS record for a domain managed by IX.</summary>
 
 Route53 HostedZones for IX managed domains live in the dns-hosting AWS account so if a workload AWS account requires a DNS record to be created this must be done "cross-account". IxDnsRecord handles that part for you. Just give it the details for the DNS record itself and IxDnsRecord will worry about creating it.
