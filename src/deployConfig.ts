@@ -19,6 +19,7 @@ const getEnvVars = () =>
     clamAVUrl: process.env.CLAMAV_URL ?? "",
     vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
     alarmSnsTopic: process.env.IX_ALARM_SNS_TOPIC ?? "",
+    tags: JSON.parse(process.env.IX_TAGS ?? "{}"),
   }) satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
@@ -44,6 +45,7 @@ const ixDeployConfigSchema = z
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
     alarmSnsTopic: z.string().min(1),
+    tags: z.record(z.string(), z.string()),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
@@ -76,6 +78,7 @@ const nonIxDeployConfigSchema = z
     clamAVUrl: z.string(),
     vpcHttpProxy: z.string(),
     alarmSnsTopic: z.string(),
+    tags: z.record(z.string(), z.string()),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
