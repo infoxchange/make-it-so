@@ -57,6 +57,55 @@ console.log(getDeployConfig());
 | smtpHost          | SMTP host for the app to use           | string                             | string                 |
 | smtpPort          | SMTP port for the app to use           | number                             | number \| undefined    |
 | clamAVUrl         | ClamAV instance url for the app to use | string                             | string                 |
+| vpcHttpProxy      | HTTP proxy URL for the VPC             | string                             | string                 |
+| alarmSnsTopic     | SNS topic ARN for CloudWatch alarms    | string                             | string                 |
+| tags              | Tags to apply to AWS resources         | Record<string, string>             | Record<string, string> |
+
+</details>
+
+### setupTags
+
+Automatically applies various AWS tags to CDK constructs in your stack and can be customized with your own tagging
+logic. Default behaviour:
+
+- Applies tags from `deployConfig.tags` to the root construct
+- Adds `guardduty-suppress: true` tag to SST "live lambda" Functions (to prevent false positive GuardDuty alerts)
+
+```typescript
+import { setupTags } from "@infoxchange/make-it-so/lib/tags";
+
+// Basic usage - automatically applies tags from deployConfig
+setupTags(app);
+
+// Advanced usage - customize tags based on construct properties
+setupTags(app, {
+  modifyTags: ({ node, isLeafNode, isRootNode, currentTags }) => {
+    // Add custom tags for specific construct types
+    if (node instanceof IxNextjsSite) {
+      return [...currentTags, { key: "ResourceType", value: "NextjsSite" }];
+    }
+    return currentTags;
+  },
+});
+```
+
+<details>
+<summary><strong>Options</strong></summary>
+
+| Prop               | Type                                                            | Description                                                               |
+| ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| scope              | IConstruct                                                      | The CDK construct to apply tags to (usually your app or stack)            |
+| options            | SetupTagsOptions                                                | (optional) Configuration options                                          |
+| options.modifyTags | (props: ModifyTagsProps) => Array<{key: string, value: string}> | (optional) Function to customize tags based on the construct being tagged |
+
+#### ModifyTagsProps:
+
+| Property    | Type                                | Description                              |
+| ----------- | ----------------------------------- | ---------------------------------------- |
+| node        | IConstruct                          | The current construct being tagged       |
+| isLeafNode  | boolean                             | Whether this construct has no children   |
+| isRootNode  | boolean                             | Whether this is the root scope construct |
+| currentTags | Array<{key: string, value: string}> | The tags that have already been applied  |
 
 </details>
 
