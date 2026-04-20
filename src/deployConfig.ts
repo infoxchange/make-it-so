@@ -40,8 +40,8 @@ const ixDeployConfigSchema = z
     sourceCommitRef: z.string().min(1),
     sourceCommitHash: z.string().min(1),
     deployTriggeredBy: z.string().min(1),
-    smtpHost: z.string().min(1),
-    smtpPort: z.coerce.number().int(),
+    smtpHost: z.string().optional(),
+    smtpPort: z.coerce.number().int().optional(),
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
     alarmSnsTopic: z.string().min(1),
@@ -69,12 +69,13 @@ const nonIxDeployConfigSchema = z
     sourceCommitRef: z.string(),
     sourceCommitHash: z.string(),
     deployTriggeredBy: z.string(),
-    smtpHost: z.string(),
+    smtpHost: z.string().optional(),
     smtpPort: z
       .string()
       .transform((val) =>
         isNaN(parseInt(val, 10)) ? undefined : parseInt(val, 10),
-      ),
+      )
+      .optional(),
     clamAVUrl: z.string(),
     vpcHttpProxy: z.string(),
     alarmSnsTopic: z.string(),
