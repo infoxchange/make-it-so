@@ -1,4 +1,4 @@
-import { Aspects } from "aws-cdk-lib";
+import { Aspects, Stack } from "aws-cdk-lib";
 import { IConstruct } from "constructs";
 import { Function } from "sst/constructs";
 import { ConditionalTags } from "./ConditionalTags.js";
@@ -26,8 +26,9 @@ export function setupTags(
     const isLeafNode = node.node.children.length === 0;
     const isRootNode = node === scope;
 
-    // Add tags from deploy config to all constructs
-    if (isRootNode) {
+    // Tags are inherited so applying them to the stack will apply them to all constructs in the stack. We can't apply
+    // them to the app construct as there's a clash with a different SST internal aspect (CreateSsmParameters).
+    if (node instanceof Stack) {
       Object.entries(deployConfig.tags).forEach(([key, value]) => {
         tags.push({ key, value });
       });
@@ -48,6 +49,11 @@ export function setupTags(
           currentTags: tags,
         })
       : tags;
+
+    if (!tags.length) {
+      // We return undefined so avoid applying the Tags aspect if there are no tags to apply.
+      return undefined;
+    }
     return tags;
   });
 
