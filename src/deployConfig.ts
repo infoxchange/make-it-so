@@ -40,7 +40,7 @@ const ixDeployConfigSchema = z
     sourceCommitRef: z.string().min(1),
     sourceCommitHash: z.string().min(1),
     deployTriggeredBy: z.string().min(1),
-    smtpHost: z.string().min(1),
+    smtpHost: z.string(),
     smtpPort: z.coerce.number().int(),
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
