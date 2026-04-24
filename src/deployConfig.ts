@@ -19,6 +19,7 @@ const getEnvVars = () =>
     clamAVUrl: process.env.CLAMAV_URL ?? "",
     vpcHttpProxy: process.env.VPC_HTTP_PROXY ?? "",
     alarmSnsTopic: process.env.IX_ALARM_SNS_TOPIC ?? "",
+    tags: JSON.parse(process.env.IX_TAGS ?? "{}"),
   }) satisfies Record<string, string | boolean>;
 
 const ixDeployConfigSchema = z
@@ -45,11 +46,12 @@ const ixDeployConfigSchema = z
     sourceCommitRef: z.string().min(1),
     sourceCommitHash: z.string().min(1),
     deployTriggeredBy: z.string().min(1),
-    smtpHost: z.string().min(1),
+    smtpHost: z.string(),
     smtpPort: z.coerce.number().int(),
     clamAVUrl: z.string().url(),
     vpcHttpProxy: z.string().url(),
     alarmSnsTopic: z.string().min(1),
+    tags: z.record(z.string(), z.string()),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
@@ -60,12 +62,18 @@ const nonIxDeployConfigSchema = z
     environment: z.string(),
     workloadGroup: z.string(),
     primaryAwsRegion: z.string(),
-    siteDomains: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
-    siteDomainAliases: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomains: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
+    siteDomainAliases: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
     isInternalApp: z
       .string()
       .transform((val) => (val ? val.toLowerCase() === "true" : undefined)),
@@ -82,6 +90,7 @@ const nonIxDeployConfigSchema = z
     clamAVUrl: z.string(),
     vpcHttpProxy: z.string(),
     alarmSnsTopic: z.string(),
+    tags: z.record(z.string(), z.string()),
   } satisfies Record<keyof ReturnType<typeof getEnvVars>, unknown>)
   .strip();
 
