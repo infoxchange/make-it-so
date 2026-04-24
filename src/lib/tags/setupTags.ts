@@ -48,6 +48,11 @@ export function setupTags(
           currentTags: tags,
         })
       : tags;
+
+    if (!tags.length) {
+      // We return undefined so avoid applying the Tags aspect if there are no tags to apply.
+      return undefined;
+    }
     return tags;
   });
 
