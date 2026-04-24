@@ -168,5 +168,5 @@ If adding a new component I've found that the easiest way to develop it is by fi
 is intended to be used in. When it appears to be working correctly it can be moved into the make-it-so repos and the app can
 be updated to import that component from make-it-so.
 
-To test change a change in make-it-so run `npx build-this-branch`. This will build then pushed the built files into a
+To test change a change in make-it-so run `npx git-publish`. This will build then pushed the built files into a
 new branch. That branch can then be used as a package.json dependency directly.
