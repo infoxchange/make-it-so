@@ -8,6 +8,7 @@ import {
   assertDefined,
   assertIsObject,
   unwrapOutput,
+  loadDeployConfigEnvVars,
 } from "./helpers/test-utils.js";
 import { StaticSiteArgs } from "sst3/platform/src/components/aws/static-site.js";
 
@@ -47,6 +48,8 @@ describe("setup", () => {
   });
 
   it("should add default domain to site constructs without domain", async () => {
+    loadDeployConfigEnvVars();
+
     const { setup } = await import("../src/components/setup-components.js");
 
     setup();
@@ -66,7 +69,7 @@ describe("setup", () => {
     assertDefined(args.domain);
     const domain = await unwrapOutput(args.domain);
     assertIsObject(domain);
-    expect(domain.name).toBeDefined();
+    expect(domain.name).toBe("test.example.com");
     expect(domain.dns).toBeDefined();
   });
 
