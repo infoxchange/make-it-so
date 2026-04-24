@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { loadDeployConfigEnvVars } from "./helpers/test-utils";
 
 describe("deployConfig", () => {
   const originalEnv = process.env;
@@ -14,24 +15,10 @@ describe("deployConfig", () => {
 
   describe("IX Deploy Configuration", () => {
     it("should parse valid IX deployment environment variables", async () => {
-      process.env.IX_DEPLOYMENT = "true";
-      process.env.IX_APP_NAME = "test-app";
-      process.env.IX_ENVIRONMENT = "dev";
-      process.env.IX_WORKLOAD_GROUP = "ds";
-      process.env.IX_PRIMARY_AWS_REGION = "ap-southeast-2";
-      process.env.IX_SITE_DOMAINS = "test.example.com,test2.example.com";
-      process.env.IX_SITE_DOMAIN_ALIASES = "alias.example.com";
-      process.env.IX_INTERNAL_APP = "true";
-      process.env.IX_DEPLOYMENT_TYPE = "serverless";
-      process.env.IX_SOURCE_COMMIT_REF = "main";
-      process.env.IX_SOURCE_COMMIT_HASH = "abc123";
-      process.env.IX_DEPLOY_TRIGGERED_BY = "deploy-123";
-      process.env.SMTP_HOST = "smtp.example.com";
-      process.env.SMTP_PORT = "587";
-      process.env.CLAMAV_URL = "http://clamav.example.com";
-      process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
-      process.env.IX_ALARM_SNS_TOPIC =
-        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+      loadDeployConfigEnvVars({
+        IX_SITE_DOMAINS: "test.example.com,test2.example.com",
+        IX_SITE_DOMAIN_ALIASES: "alias.example.com",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -55,30 +42,21 @@ describe("deployConfig", () => {
       expect(config.smtpPort).toBe(587);
       expect(config.clamAVUrl).toBe("http://clamav.example.com");
       expect(config.vpcHttpProxy).toBe("http://proxy.example.com");
+      expect(config.tags.project).toBe("test-project");
     });
 
     it("should parse all valid environment values (test, uat, prod)", async () => {
       const environments = ["test", "uat", "prod"] as const;
 
       for (const env of environments) {
-        process.env.IX_DEPLOYMENT = "true";
-        process.env.IX_APP_NAME = "test-app";
-        process.env.IX_ENVIRONMENT = env;
-        process.env.IX_WORKLOAD_GROUP = "srs";
-        process.env.IX_PRIMARY_AWS_REGION = "ap-southeast-2";
-        process.env.IX_SITE_DOMAINS = "test.example.com";
-        process.env.IX_SITE_DOMAIN_ALIASES = "";
-        process.env.IX_INTERNAL_APP = "false";
-        process.env.IX_DEPLOYMENT_TYPE = "docker";
-        process.env.IX_SOURCE_COMMIT_REF = "main";
-        process.env.IX_SOURCE_COMMIT_HASH = "abc123";
-        process.env.IX_DEPLOY_TRIGGERED_BY = "deploy-123";
-        process.env.SMTP_HOST = "smtp.example.com";
-        process.env.SMTP_PORT = "25";
-        process.env.CLAMAV_URL = "http://clamav.example.com";
-        process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
-        process.env.IX_ALARM_SNS_TOPIC =
-          "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+        loadDeployConfigEnvVars({
+          IX_ENVIRONMENT: env,
+          IX_WORKLOAD_GROUP: "srs",
+          IX_SITE_DOMAIN_ALIASES: "",
+          IX_INTERNAL_APP: "false",
+          IX_DEPLOYMENT_TYPE: "docker",
+          SMTP_PORT: "25",
+        });
 
         const { getDeployConfig } = await import("../src/deployConfig.js");
         const config = getDeployConfig();
@@ -89,24 +67,10 @@ describe("deployConfig", () => {
     });
 
     it("should handle comma-separated domains with whitespace", async () => {
-      process.env.IX_DEPLOYMENT = "true";
-      process.env.IX_APP_NAME = "test-app";
-      process.env.IX_ENVIRONMENT = "dev";
-      process.env.IX_WORKLOAD_GROUP = "ds";
-      process.env.IX_PRIMARY_AWS_REGION = "ap-southeast-2";
-      process.env.IX_SITE_DOMAINS = " domain1.com , domain2.com,  domain3.com ";
-      process.env.IX_SITE_DOMAIN_ALIASES = " alias1.com, alias2.com ";
-      process.env.IX_INTERNAL_APP = "true";
-      process.env.IX_DEPLOYMENT_TYPE = "serverless";
-      process.env.IX_SOURCE_COMMIT_REF = "main";
-      process.env.IX_SOURCE_COMMIT_HASH = "abc123";
-      process.env.IX_DEPLOY_TRIGGERED_BY = "deploy-123";
-      process.env.SMTP_HOST = "smtp.example.com";
-      process.env.SMTP_PORT = "587";
-      process.env.CLAMAV_URL = "http://clamav.example.com";
-      process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
-      process.env.IX_ALARM_SNS_TOPIC =
-        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+      loadDeployConfigEnvVars({
+        IX_SITE_DOMAINS: " domain1.com , domain2.com,  domain3.com ",
+        IX_SITE_DOMAIN_ALIASES: " alias1.com, alias2.com ",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -120,56 +84,27 @@ describe("deployConfig", () => {
     });
 
     it("should throw error for invalid environment", async () => {
-      process.env.IX_DEPLOYMENT = "true";
-      process.env.IX_APP_NAME = "test-app";
-      process.env.IX_ENVIRONMENT = "invalid-env";
-      process.env.IX_WORKLOAD_GROUP = "ds";
-      process.env.IX_PRIMARY_AWS_REGION = "ap-southeast-2";
-      process.env.IX_SITE_DOMAINS = "test.example.com";
-      process.env.IX_SITE_DOMAIN_ALIASES = "";
-      process.env.IX_INTERNAL_APP = "true";
-      process.env.IX_DEPLOYMENT_TYPE = "serverless";
-      process.env.IX_SOURCE_COMMIT_REF = "main";
-      process.env.IX_SOURCE_COMMIT_HASH = "abc123";
-      process.env.IX_DEPLOY_TRIGGERED_BY = "deploy-123";
-      process.env.SMTP_HOST = "smtp.example.com";
-      process.env.SMTP_PORT = "587";
-      process.env.CLAMAV_URL = "http://clamav.example.com";
-      process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
-      process.env.IX_ALARM_SNS_TOPIC =
-        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+      loadDeployConfigEnvVars({
+        IX_ENVIRONMENT: "invalid-env",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       expect(() => getDeployConfig()).toThrow();
     });
 
     it("should throw error for invalid workload group", async () => {
-      process.env.IX_DEPLOYMENT = "true";
-      process.env.IX_APP_NAME = "test-app";
-      process.env.IX_ENVIRONMENT = "dev";
-      process.env.IX_WORKLOAD_GROUP = "invalid-group";
-      process.env.IX_PRIMARY_AWS_REGION = "ap-southeast-2";
-      process.env.IX_SITE_DOMAINS = "test.example.com";
-      process.env.IX_SITE_DOMAIN_ALIASES = "";
-      process.env.IX_INTERNAL_APP = "true";
-      process.env.IX_DEPLOYMENT_TYPE = "serverless";
-      process.env.IX_SOURCE_COMMIT_REF = "main";
-      process.env.IX_SOURCE_COMMIT_HASH = "abc123";
-      process.env.IX_DEPLOY_TRIGGERED_BY = "deploy-123";
-      process.env.SMTP_HOST = "smtp.example.com";
-      process.env.SMTP_PORT = "587";
-      process.env.CLAMAV_URL = "http://clamav.example.com";
-      process.env.VPC_HTTP_PROXY = "http://proxy.example.com";
-      process.env.IX_ALARM_SNS_TOPIC =
-        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+      loadDeployConfigEnvVars({
+        IX_WORKLOAD_GROUP: "invalid-group",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       expect(() => getDeployConfig()).toThrow();
     });
 
     it("should throw error for missing required fields in IX deploy", async () => {
-      process.env.IX_DEPLOYMENT = "true";
-      process.env.IX_APP_NAME = ""; // Missing required field
+      loadDeployConfigEnvVars({
+        IX_APP_NAME: "", // Missing required field
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       expect(() => getDeployConfig()).toThrow();
@@ -178,24 +113,22 @@ describe("deployConfig", () => {
 
   describe("Non-IX Deploy Configuration", () => {
     it("should parse non-IX deployment configuration", async () => {
-      process.env.IX_DEPLOYMENT = "false";
-      process.env.IX_APP_NAME = "test-app";
-      process.env.IX_ENVIRONMENT = "local";
-      process.env.IX_WORKLOAD_GROUP = "custom";
-      process.env.IX_PRIMARY_AWS_REGION = "us-east-1";
-      process.env.IX_SITE_DOMAINS = "localhost:3000";
-      process.env.IX_SITE_DOMAIN_ALIASES = "";
-      process.env.IX_INTERNAL_APP = "true";
-      process.env.IX_DEPLOYMENT_TYPE = "local";
-      process.env.IX_SOURCE_COMMIT_REF = "feature-branch";
-      process.env.IX_SOURCE_COMMIT_HASH = "xyz789";
-      process.env.IX_DEPLOY_TRIGGERED_BY = "manual";
-      process.env.SMTP_HOST = "localhost";
-      process.env.SMTP_PORT = "1025";
-      process.env.CLAMAV_URL = "http://localhost:3310";
-      process.env.VPC_HTTP_PROXY = "http://localhost:8080";
-      process.env.IX_ALARM_SNS_TOPIC =
-        "arn:aws:sns:ap-southeast-2:123456789012:alarm-topic";
+      loadDeployConfigEnvVars({
+        IX_DEPLOYMENT: "false",
+        IX_ENVIRONMENT: "local",
+        IX_WORKLOAD_GROUP: "custom",
+        IX_PRIMARY_AWS_REGION: "us-east-1",
+        IX_SITE_DOMAINS: "localhost:3000",
+        IX_SITE_DOMAIN_ALIASES: "",
+        IX_DEPLOYMENT_TYPE: "local",
+        IX_SOURCE_COMMIT_REF: "feature-branch",
+        IX_SOURCE_COMMIT_HASH: "xyz789",
+        IX_DEPLOY_TRIGGERED_BY: "manual",
+        SMTP_HOST: "localhost",
+        SMTP_PORT: "1025",
+        CLAMAV_URL: "http://localhost:3310",
+        VPC_HTTP_PROXY: "http://localhost:8080",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -211,7 +144,13 @@ describe("deployConfig", () => {
     });
 
     it("should handle missing optional fields in non-IX deploy", async () => {
-      process.env.IX_DEPLOYMENT = "false";
+      loadDeployConfigEnvVars({
+        IX_DEPLOYMENT: "false",
+        IX_APP_NAME: "",
+        IX_ENVIRONMENT: "",
+        IX_INTERNAL_APP: "",
+        SMTP_PORT: "",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -224,8 +163,10 @@ describe("deployConfig", () => {
     });
 
     it("should handle invalid port number in non-IX deploy", async () => {
-      process.env.IX_DEPLOYMENT = "false";
-      process.env.SMTP_PORT = "not-a-number";
+      loadDeployConfigEnvVars({
+        IX_DEPLOYMENT: "false",
+        SMTP_PORT: "not-a-number",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config = getDeployConfig();
@@ -237,15 +178,21 @@ describe("deployConfig", () => {
 
   describe("getDeployConfig function", () => {
     it("should re-evaluate environment variables on each call", async () => {
-      process.env.IX_DEPLOYMENT = "false";
-      process.env.IX_APP_NAME = "first-app";
+      loadDeployConfigEnvVars({
+        IX_DEPLOYMENT: "false",
+        IX_APP_NAME: "first-app",
+      });
 
       const { getDeployConfig } = await import("../src/deployConfig.js");
       const config1 = getDeployConfig();
       expect(config1.appName).toBe("first-app");
 
       // Change environment variable
-      process.env.IX_APP_NAME = "second-app";
+      loadDeployConfigEnvVars({
+        IX_DEPLOYMENT: "false",
+        IX_APP_NAME: "second-app",
+      });
+
       const config2 = getDeployConfig();
       expect(config2.appName).toBe("second-app");
     });
