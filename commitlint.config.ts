@@ -5,9 +5,7 @@ export default {
     (message) =>
       // Allow "wip" commits except when publishing a production release or on PR CI jobs
       process.env.GITHUB_EVENT_NAME !== "pull_request" &&
-      (process.env.GITHUB_WORKFLOW !== "Publish" ||
-        (process.env.GITHUB_REF_NAME?.startsWith("internal-testing-") ??
-          true)) &&
+      process.env.GITHUB_WORKFLOW !== "Publish" &&
       (message === "wip" || message.startsWith("wip:")),
   ],
   extends: ["@commitlint/config-conventional"],

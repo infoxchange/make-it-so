@@ -13,7 +13,8 @@
     "lint": "eslint . --fix && prettier . --write && tsc --noEmit",
     "lint:check": "eslint . && prettier . --check && tsc --noEmit",
     "prepare": "husky",
-    "commit": "lint-staged && commit"
+    "commit": "lint-staged && commit",
+    "prepack": "npm run build"
   },
   "author": "Infoxchange Vic Dev Team <vicdevs@infoxchange.org>",
   "license": "MIT",
