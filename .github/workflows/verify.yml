@@ -5,11 +5,11 @@ on:
     branches:
       - "*"
       - "!main"
-      - "!internal-testing-*"
+      - "!ci-publish-test"
   pull_request: # We also run on PRs to verify the commit messages of all commits in the PR
     branches:
       - main
-      - internal-testing-*
+      - ci-publish-test
   workflow_call:
 
 jobs:
