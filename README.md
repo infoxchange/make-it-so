@@ -168,4 +168,5 @@ If adding a new component I've found that the easiest way to develop it is by fi
 is intended to be used in. When it appears to be working correctly it can be moved into the make-it-so repos and the app can
 be updated to import that component from make-it-so.
 
-To test change a change in make-it-so create a branch starting with the prefix "internal-testing-". When pushed the CI will release a new package with a pre-release version. It'll look a little something like `2.1.3-internal-testing-name-of-feature.3`. A serverless app using make-it-so can be modified to use this package version and then deployed to a dev environment to test that the make-it-so changes are functioning correctly. Once a change has been merged into main and there are no serverless apps using the pre-release package any more it's a good idea to [delete that version](https://docs.npmjs.com/unpublishing-packages-from-the-registry#unpublishing-a-single-version-of-a-package) to keep the [npm package version history clean](https://www.npmjs.com/package/@infoxchange/make-it-so?activeTab=versions).
+To test change a change in make-it-so run `npx git-publish`. This will build then pushed the built files into a
+new branch. That branch can then be used as a package.json dependency directly.

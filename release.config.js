@@ -1,7 +1,3 @@
-import { execSync } from "child_process";
-
-const gitCommit = getGitShortCommit();
-
 export default {
   branches: [
     "main",
@@ -9,9 +5,13 @@ export default {
       name: "sst-v2",
       range: "2.x.x",
     },
+    // There are occasionally times where you need to verify the CI release process. To avoid creating real releases
+    // while still doing a fairly representative test any deployments of this branch will publish a "prerelease" version
     {
-      name: "internal-testing-*",
-      prerelease: `\${name}-${gitCommit}`,
+      name: "ci-publish-test",
+      // Adding a timestamp to the prerelease tags avoids conflicts on rebases where the version
+      // might otherwise be the same as a previously published prerelease version
+      prerelease: `\${name}-${Date.now()}`,
     },
   ],
   preset: "conventionalcommits",
@@ -41,12 +41,3 @@ export default {
     "@semantic-release/github",
   ],
 };
-
-function getGitShortCommit() {
-  try {
-    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
-  } catch (error) {
-    console.error("Failed to get git commit hash:", error);
-    return "unknown";
-  }
-}
