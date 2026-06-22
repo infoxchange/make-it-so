@@ -29,12 +29,18 @@ const ixDeployConfigSchema = z
     environment: z.enum(["dev", "test", "uat", "prod"]),
     workloadGroup: z.enum(["ds", "srs"]),
     primaryAwsRegion: z.literal("ap-southeast-2"),
-    siteDomains: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
-    siteDomainAliases: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomains: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
+    siteDomainAliases: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
     isInternalApp: z.coerce.boolean(),
     deploymentType: z.enum(["docker", "serverless"]),
     sourceCommitRef: z.string().min(1),
@@ -56,12 +62,18 @@ const nonIxDeployConfigSchema = z
     environment: z.string(),
     workloadGroup: z.string(),
     primaryAwsRegion: z.string(),
-    siteDomains: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
-    siteDomainAliases: z
-      .string()
-      .transform((val) => val.split(",").map((domain) => domain.trim())),
+    siteDomains: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
+    siteDomainAliases: z.string().transform((val) =>
+      val
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    ),
     isInternalApp: z
       .string()
       .transform((val) => (val ? val.toLowerCase() === "true" : undefined)),
