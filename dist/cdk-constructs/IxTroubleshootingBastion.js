@@ -1,4 +1,4 @@
-import { CfnOutput, Names, Stack, Tags } from "aws-cdk-lib";
+import { CfnOutput, Tags } from "aws-cdk-lib";
 import { AmazonLinuxCpuType, BastionHostLinux, InstanceArchitecture, InstanceClass, InstanceSize, InstanceType, KeyPair, KeyPairType, MachineImage, Peer, Port, SecurityGroup, SubnetType, } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 import { IxVpcDetails } from "./IxVpcDetails.js";
@@ -37,40 +37,26 @@ export class IxTroubleshootingBastion extends Construct {
     constructor(scope, id, { allowSshFrom = ["0.0.0.0/0"], securityGroup, packages = [], ...bastionProps } = {}) {
         super(scope, id);
         const { vpc } = new IxVpcDetails(this, `${id}-IxVpcDetails`);
-        const namePrefix = Stack.of(this).stackName;
         this.securityGroup =
             securityGroup ??
                 new SecurityGroup(this, `${id}-SecurityGroup`, {
                     vpc,
                     allowAllOutbound: true,
-                    description: "Security group for troubleshooting bastion",
-                    securityGroupName: `${namePrefix}-troubleshooting-bastion`,
+                    description: `Security group for ${deployConfig.appName} ${deployConfig.environment} troubleshooting bastion`,
                 });
         for (const cidr of allowSshFrom) {
             this.securityGroup.addIngressRule(Peer.ipv4(cidr), Port.tcp(22), `Allow SSH to the troubleshooting bastion from ${cidr}`);
         }
-        // Key pair names are unique per region, so the name carries a disambiguating suffix. It comes from the construct
-        // path rather than anything per-deploy so that the name (and so the instance's key) stays put across deploys.
-        // EC2 documents no more than "up to 255 ASCII characters" for a key pair name, but it does accept the slashes.
-        const keyPairName = [
-            deployConfig.appName,
-            deployConfig.environment,
-            "TroubleshootingBastion",
-            `key-${Names.uniqueId(this).slice(-8).toLowerCase()}`,
-        ]
-            .filter(Boolean)
-            .join("/");
         // Omitting publicKeyMaterial is what makes this a generated key pair, which is what gets the private key written
         // to Parameter Store. ED25519 over the RSA default for a shorter key; fine for Linux, unsupported on Windows.
         this.keyPair = new KeyPair(this, `${id}-KeyPair`, {
-            keyPairName,
             type: KeyPairType.ED25519,
         });
         // The smallest instance type available, and the cheapest of the 512MiB ones.
         const instanceType = bastionProps.instanceType ??
             InstanceType.of(InstanceClass.T4G, InstanceSize.NANO);
         this.bastion = new BastionHostLinux(this, `${id}-Bastion`, {
-            instanceName: `${namePrefix}-troubleshooting-bastion`,
+            instanceName: `${deployConfig.appName}-${deployConfig.environment}-${id}`,
             // IxVpcDetails registers its subnets as isolated, so the BastionHostLinux default of PRIVATE_WITH_EGRESS finds
             // no subnets to place the instance in.
             subnetSelection: { subnetType: SubnetType.PRIVATE_ISOLATED },
