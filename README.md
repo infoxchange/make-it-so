@@ -422,6 +422,88 @@ new IxWebsiteRedirect(scope, "WebsiteRedirect", {
 </details>
 
 <details>
+<summary><strong>IxTroubleshootingBastion</strong> - Deploys a temporary EC2 host for debugging things only reachable from inside the VPC.</summary>
+
+Sometimes you need to poke at something that only exists inside the VPC — an RDS instance, an Elasticache cluster, an internal API. This deploys a small host in the standard IX VPC that you can SSH into and use as a jump box.
+
+It is built on [CDK's BastionHostLinux](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2.BastionHostLinux.html) and accepts all the same props, with these differences:
+
+- It always attaches to the standard IX VPC and its private subnets (via `IxVpcDetails`), so there is no `vpc` prop.
+- It is set up for SSH rather than SSM Session Manager. EC2 generates a key pair and CloudFormation stores the private key in Parameter Store, so no key material passes through the CloudFormation template, an env var, or your shell history.
+- It defaults to the smallest instance type available, `t4g.nano`.
+- It tags itself with `CreatorResource=IxTroubleshootingBastion` so you can find it without knowing the stack or instance name.
+
+```typescript
+import { IxTroubleshootingBastion } from "@infoxchange/make-it-so/cdk-constructs";
+
+// Deploy it behind an env var so it isn't part of a normal deploy
+if (process.env.TROUBLESHOOTING_BASTION) {
+  new IxTroubleshootingBastion(stack, "TroubleshootingBastion", {
+    packages: ["postgresql16"],
+  });
+}
+```
+
+> [!WARNING]
+> This is a debugging tool, not something to leave running. It should be reasonably secure as it's private IP means it's
+> only connectable over the VPN and it can only be connected to with the SSH key. But still better not to tempt fate so
+> remove it once you are done.
+
+#### Connecting:
+
+On a CI deploy the instructions below are emitted as a workflow annotation with the values already filled in. Otherwise,
+find the host and download it's key pair:
+
+```shell
+ix aws auth -A app:$APP_NAME/$APP_ENV -- aws ec2 describe-instances \
+  --filters Name=tag:CreatorResource,Values=IxTroubleshootingBastion \
+            Name=instance-state-name,Values=running \
+  --query "Reservations[].Instances[].[PrivateIpAddress,KeyName]" --output text
+
+ix aws auth -A app:$APP_NAME/$APP_ENV -- aws ec2 describe-key-pairs --key-names <key name> \
+  --query "KeyPairs[].KeyPairId" --output text
+
+ix aws auth -A app:$APP_NAME/$APP_ENV -- aws ssm get-parameter --name /ec2/keypair/<key pair id> --with-decryption \
+  --query Parameter.Value --output text > /tmp/troubleshooting-bastion.pem
+
+chmod 400 /tmp/troubleshooting-bastion.pem # SSH will not accept the key otherwise
+```
+
+If you are connected to the VPN you should be able to SSH to the bastion host with:
+
+```shell
+ssh -i /tmp/troubleshooting-bastion.pem ec2-user@<private ip>
+```
+
+To reach a service through the bastion rather than from it, use a local port forward. For example to get at Postgres on RDS from your machine:
+
+```shell
+ssh -N -i /tmp/troubleshooting-bastion.pem \
+  -L 5433:<rds endpoint>:5432 \
+  ec2-user@<private ip>
+```
+
+Note that whatever you are connecting to needs a security group that accepts traffic from the bastion, either by allowing the private subnet CIDRs or by having the bastion's `securityGroup` added to it.
+
+#### Options:
+
+| Prop                       | Type     | Description                                                                                                                                                      |
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| allowSshFrom               | string[] | (optional) CIDRs allowed to reach the host on port 22. Defaults to `["0.0.0.0/0"]`                                                                               |
+| packages                   | string[] | (optional) Extra packages to `dnf install` at boot, eg a database client to poke at RDS with                                                                     |
+| [...BastionHostLinuxProps] |          | Any props accepted by [BastionHostLinux](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2.BastionHostLinux.html#construct-props) other than `vpc` |
+
+#### Properties:
+
+| Properties    | Type             | Description                                                                            |
+| ------------- | ---------------- | -------------------------------------------------------------------------------------- |
+| bastion       | BastionHostLinux | The underlying AWS CDK BastionHostLinux instance                                       |
+| keyPair       | KeyPair          | The generated EC2 key pair. Its `keyPairId` gives the Parameter Store path for the key |
+| securityGroup | ISecurityGroup   | The host's security group, to add to the security groups of whatever it needs to reach |
+
+</details>
+
+<details>
 <summary><strong>IxVpcDetails</strong> - Fetches the standard VPC and subnets that exist in all IX workload aws accounts.</summary>
 
 ```typescript

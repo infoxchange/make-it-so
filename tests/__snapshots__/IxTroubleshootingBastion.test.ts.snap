@@ -1,0 +1,150 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`basic example - creates a key pair and an instance that uses it 1`] = `
+{
+  "TroubleshootingBastionTroubleshootingBastionKeyPairDF3ED4A7": {
+    "Properties": {
+      "KeyFormat": "pem",
+      "KeyName": "examplestackTroubleshootingBastionTroubleshootingBastionKeyPair640E7CE4",
+      "KeyType": "ed25519",
+    },
+    "Type": "AWS::EC2::KeyPair",
+  },
+}
+`;
+
+exports[`basic example - creates a key pair and an instance that uses it 2`] = `
+{
+  "TroubleshootingBastionTroubleshootingBastionBastionEBB40CDE": {
+    "DependsOn": [
+      "TroubleshootingBastionTroubleshootingBastionBastionInstanceRoleDefaultPolicy44D072E3",
+      "TroubleshootingBastionTroubleshootingBastionBastionInstanceRole7A39F875",
+    ],
+    "Properties": {
+      "AvailabilityZone": "ap-southeast-2a",
+      "IamInstanceProfile": {
+        "Ref": "TroubleshootingBastionTroubleshootingBastionBastionInstanceProfile72488EA9",
+      },
+      "ImageId": {
+        "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61arm64C96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+      "InstanceType": "t4g.nano",
+      "KeyName": {
+        "Ref": "TroubleshootingBastionTroubleshootingBastionKeyPairDF3ED4A7",
+      },
+      "SecurityGroupIds": [
+        {
+          "Fn::GetAtt": [
+            "TroubleshootingBastionTroubleshootingBastionSecurityGroupF8EA3A10",
+            "GroupId",
+          ],
+        },
+      ],
+      "SubnetId": {
+        "Ref": "SsmParameterValuevpcsubnetprivate1idC96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+      "Tags": [
+        {
+          "Key": "CreatorResource",
+          "Value": "IxTroubleshootingBastion",
+        },
+        {
+          "Key": "Name",
+          "Value": "--TroubleshootingBastion",
+        },
+      ],
+      "UserData": {
+        "Fn::Base64": "#!/bin/bash",
+      },
+    },
+    "Type": "AWS::EC2::Instance",
+  },
+}
+`;
+
+exports[`full example - restricted ingress and extra packages 1`] = `
+{
+  "TroubleshootingBastionTroubleshootingBastionSecurityGroupF8EA3A10": {
+    "Properties": {
+      "GroupDescription": "Security group for   troubleshooting bastion",
+      "SecurityGroupEgress": [
+        {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "Allow all outbound traffic by default",
+          "IpProtocol": "-1",
+        },
+      ],
+      "SecurityGroupIngress": [
+        {
+          "CidrIp": "10.1.2.0/24",
+          "Description": "Allow SSH to the troubleshooting bastion from 10.1.2.0/24",
+          "FromPort": 22,
+          "IpProtocol": "tcp",
+          "ToPort": 22,
+        },
+        {
+          "CidrIp": "10.9.9.0/24",
+          "Description": "Allow SSH to the troubleshooting bastion from 10.9.9.0/24",
+          "FromPort": 22,
+          "IpProtocol": "tcp",
+          "ToPort": 22,
+        },
+      ],
+      "VpcId": {
+        "Ref": "SsmParameterValuevpcidC96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+    },
+    "Type": "AWS::EC2::SecurityGroup",
+  },
+}
+`;
+
+exports[`full example - restricted ingress and extra packages 2`] = `
+{
+  "TroubleshootingBastionTroubleshootingBastionBastionEBB40CDE": {
+    "DependsOn": [
+      "TroubleshootingBastionTroubleshootingBastionBastionInstanceRoleDefaultPolicy44D072E3",
+      "TroubleshootingBastionTroubleshootingBastionBastionInstanceRole7A39F875",
+    ],
+    "Properties": {
+      "AvailabilityZone": "ap-southeast-2a",
+      "IamInstanceProfile": {
+        "Ref": "TroubleshootingBastionTroubleshootingBastionBastionInstanceProfile72488EA9",
+      },
+      "ImageId": {
+        "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61arm64C96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+      "InstanceType": "t4g.nano",
+      "KeyName": {
+        "Ref": "TroubleshootingBastionTroubleshootingBastionKeyPairDF3ED4A7",
+      },
+      "SecurityGroupIds": [
+        {
+          "Fn::GetAtt": [
+            "TroubleshootingBastionTroubleshootingBastionSecurityGroupF8EA3A10",
+            "GroupId",
+          ],
+        },
+      ],
+      "SubnetId": {
+        "Ref": "SsmParameterValuevpcsubnetprivate1idC96584B6F00A464EAD1953AFF4B05118Parameter",
+      },
+      "Tags": [
+        {
+          "Key": "CreatorResource",
+          "Value": "IxTroubleshootingBastion",
+        },
+        {
+          "Key": "Name",
+          "Value": "--TroubleshootingBastion",
+        },
+      ],
+      "UserData": {
+        "Fn::Base64": "#!/bin/bash
+dnf install -y postgresql16",
+      },
+    },
+    "Type": "AWS::EC2::Instance",
+  },
+}
+`;
