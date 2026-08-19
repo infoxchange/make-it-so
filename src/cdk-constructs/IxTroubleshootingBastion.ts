@@ -79,13 +79,13 @@ export class IxTroubleshootingBastion extends Construct {
   ) {
     super(scope, id);
 
-    const { vpc } = new IxVpcDetails(this, "IxVpcDetails");
+    const { vpc } = new IxVpcDetails(this, `${id}-IxVpcDetails`);
 
     const namePrefix = Stack.of(this).stackName;
 
     this.securityGroup =
       securityGroup ??
-      new SecurityGroup(this, "SecurityGroup", {
+      new SecurityGroup(this, `${id}-SecurityGroup`, {
         vpc,
         allowAllOutbound: true,
         description: "Security group for troubleshooting bastion",
@@ -114,7 +114,7 @@ export class IxTroubleshootingBastion extends Construct {
 
     // Omitting publicKeyMaterial is what makes this a generated key pair, which is what gets the private key written
     // to Parameter Store. ED25519 over the RSA default for a shorter key; fine for Linux, unsupported on Windows.
-    this.keyPair = new KeyPair(this, "KeyPair", {
+    this.keyPair = new KeyPair(this, `${id}-KeyPair`, {
       keyPairName,
       type: KeyPairType.ED25519,
     });
@@ -124,7 +124,7 @@ export class IxTroubleshootingBastion extends Construct {
       bastionProps.instanceType ??
       InstanceType.of(InstanceClass.T4G, InstanceSize.NANO);
 
-    this.bastion = new BastionHostLinux(this, "Bastion", {
+    this.bastion = new BastionHostLinux(this, `${id}-Bastion`, {
       instanceName: `${namePrefix}-troubleshooting-bastion`,
       // IxVpcDetails registers its subnets as isolated, so the BastionHostLinux default of PRIVATE_WITH_EGRESS finds
       // no subnets to place the instance in.
