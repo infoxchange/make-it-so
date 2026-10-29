@@ -30,6 +30,10 @@ export class IxCertificate extends Construct {
         scope,
         "/shared-services/acm/lambdaArn-v2",
       );
+    const certificateLambdaSourceKey = StringParameter.valueForStringParameter(
+      scope,
+      "/shared-services/acm/lambdaSourceKey-v2",
+    );
     const certificateCustomResource = new CustomResource(
       scope,
       "DomainCert-" + id,
@@ -41,6 +45,7 @@ export class IxCertificate extends Construct {
           ...(props.subjectAlternativeNames && {
             SubjectAlternativeNames: props.subjectAlternativeNames,
           }),
+          SourceCodeCacheBreak: certificateLambdaSourceKey,
           ...(props.region && { CertificateIssuingRegion: props.region }),
         },
       },
